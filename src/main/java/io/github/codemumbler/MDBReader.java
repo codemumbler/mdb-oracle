@@ -60,8 +60,13 @@ public class MDBReader {
 		return columns;
 	}
 
-	private int readLength(com.healthmarketscience.jackcess.Column originalColumn) {
-		return 9;
+	private int readLength(com.healthmarketscience.jackcess.Column originalColumn) throws SQLException {
+		switch ( originalColumn.getSQLType() ) {
+			case LONG_INTEGER:
+				return 9;
+			default:
+				return originalColumn.getLength();
+		}
 	}
 
 	private boolean isPrimaryColumn(String tableName, com.healthmarketscience.jackcess.Column originalColumn)
@@ -81,10 +86,7 @@ public class MDBReader {
 				hasPrimaryKey = true;
 			}
 		}
-		if ( originalColumn.isAutoNumber() && !hasPrimaryKey ) {
-			return true;
-		}
-		return false;
+		return originalColumn.isAutoNumber() && !hasPrimaryKey;
 	}
 
 	private DataType readDataType(com.healthmarketscience.jackcess.Column originalColumn) throws SQLException {

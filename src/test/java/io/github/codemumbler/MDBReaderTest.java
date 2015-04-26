@@ -47,9 +47,9 @@ public class MDBReaderTest {
 	}
 
 	@Test
-	public void table() {
+	public void tableCount() {
 		setUpMDBReader(SIMPLE_DATABASE_FILE);
-		Assert.assertEquals(1, database.getTables().size());
+		Assert.assertEquals(2, database.getTables().size());
 	}
 
 	@Test
@@ -116,6 +116,13 @@ public class MDBReaderTest {
 		setUpSimpleDatabase();
 		Column column = getColumn(ID_COLUMN);
 		Assert.assertEquals(9, column.getLength());
+	}
+
+	@Test
+	public void textColumnLength() {
+		setUpSimpleDatabase();
+		Column column = getColumn(LABEL_COLUMN);
+		Assert.assertEquals(510, column.getLength());
 	}
 
 	private Column getColumn(int columnIndex) {
