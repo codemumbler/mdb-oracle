@@ -48,9 +48,20 @@ public class MDBReader {
 			Table table = new Table();
 			table.setName(tableName);
 			table.setColumns(readTableColumns(tableName));
+			table.setRows(readTableData(tableName));
 			tables.add(table);
 		}
 		database.setTables(tables);
+	}
+
+	private List<Row> readTableData(String tableName) throws IOException {
+		com.healthmarketscience.jackcess.Table sourceTable = jackcessDatabase.getTable(tableName);
+		List<Row> rows = new ArrayList<>(sourceTable.getRowCount());
+		for ( com.healthmarketscience.jackcess.Row sourceRow : sourceTable ) {
+			Row row = new Row();
+			rows.add(row);
+		}
+		return rows;
 	}
 
 	private List<Column> readTableColumns(String tableName) throws IOException, SQLException {
