@@ -7,6 +7,7 @@ public class Column {
 	private boolean primary;
 	private int length;
 	private boolean autoIncrement;
+	private int precision;
 
 	public String getName() {
 		return name;
@@ -46,5 +47,13 @@ public class Column {
 
 	public void setAutoIncrement(boolean autoIncrement) {
 		this.autoIncrement = autoIncrement;
+	}
+
+	public int getPrecision() {
+		return precision;
+	}
+
+	public void setPrecision(int precision) {
+		this.precision = precision;
 	}
 }

@@ -126,6 +126,27 @@ public class MDBReaderTest {
 	}
 
 	@Test
+	public void booleanLength() {
+		setUpSimpleDatabase();
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 4);
+		Assert.assertEquals(1, column.getLength());
+	}
+
+	@Test
+	public void precision() {
+		setUpSimpleDatabase();
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 7);
+		Assert.assertEquals(4, column.getPrecision());
+	}
+
+	@Test
+	public void autoPrecision() {
+		setUpMDBReader("badExamples.accdb");
+		Column column = getTableColumn(0, 2);
+		Assert.assertEquals(5, column.getPrecision());
+	}
+
+	@Test
 	public void memoLength() {
 		setUpSimpleDatabase();
 		Assert.assertEquals(0, getTableColumn(SIMPLE_VALUES_TABLE, 1).getLength());

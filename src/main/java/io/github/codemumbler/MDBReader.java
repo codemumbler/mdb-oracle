@@ -2,6 +2,7 @@ package io.github.codemumbler;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Index;
+import com.healthmarketscience.jackcess.PropertyMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,13 +63,32 @@ public class MDBReader {
 			column.setLength(readLength(originalColumn));
 			column.setPrimary(isPrimaryColumn(tableName, originalColumn));
 			column.setAutoIncrement(originalColumn.isAutoNumber());
+			if ( column.getDataType() == DataType.DOUBLE )
+				column.setPrecision(precision(originalColumn));
 			columns.add(column);
 		}
 		return columns;
 	}
 
+	private int precision(com.healthmarketscience.jackcess.Column originalColumn) throws IOException {
+		int precision = 5;
+		if ( readColumnProperty(originalColumn, "DecimalPlaces") != null ) {
+			precision = (Byte) readColumnProperty(originalColumn, "DecimalPlaces");
+			if (precision <= 0)
+				precision = 5;
+		}
+		return precision;
+	}
+
+	private Object readColumnProperty(com.healthmarketscience.jackcess.Column column, String propertyName)
+			throws IOException {
+		PropertyMap.Property property = column.getProperties().get(propertyName);
+		return property.getValue();
+	}
+
 	private int readLength(com.healthmarketscience.jackcess.Column originalColumn) throws SQLException {
 		switch ( originalColumn.getSQLType() ) {
+			case DOUBLE:
 			case LONG_INTEGER:
 				return 9;
 			default:
