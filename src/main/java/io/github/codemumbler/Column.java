@@ -8,6 +8,7 @@ public class Column {
 	private int length;
 	private boolean autoIncrement;
 	private int precision;
+	private boolean required;
 
 	public String getName() {
 		return name;
@@ -55,5 +56,13 @@ public class Column {
 
 	public void setPrecision(int precision) {
 		this.precision = precision;
+	}
+
+	public boolean isRequired() {
+		return required;
+	}
+
+	public void setRequired(boolean required) {
+		this.required = required;
 	}
 }

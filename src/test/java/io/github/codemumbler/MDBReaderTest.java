@@ -140,6 +140,18 @@ public class MDBReaderTest {
 	}
 
 	@Test
+	public void required() {
+		setUpSimpleDatabase();
+		Assert.assertTrue(getTableColumn(LABEL_COLUMN).isRequired());
+	}
+
+	@Test
+	public void primaryKeyIsRequiredColumn() {
+		setUpSimpleDatabase();
+		Assert.assertTrue(getTableColumn(ID_COLUMN).isRequired());
+	}
+
+	@Test
 	public void autoPrecision() {
 		setUpMDBReader("badExamples.accdb");
 		Column column = getTableColumn(0, 2);
@@ -223,6 +235,7 @@ public class MDBReaderTest {
 			reader = new MDBReader(new File(ClassLoader.getSystemResource(mdbFileName).toURI()));
 			database = reader.loadDatabase();
 		} catch (Exception e) {
+			e.printStackTrace();
 			Assert.fail("Failed to initialized access database");
 		}
 	}

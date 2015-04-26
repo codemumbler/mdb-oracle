@@ -19,6 +19,7 @@ public class MDBReader {
 	public static final int DATE_TIME = 93;
 	private static final int DOUBLE = 8;
 	private static final int BOOLEAN = 16;
+	public static final int DEFAULT_PRECISION = 5;
 
 	private Database database;
 	private com.healthmarketscience.jackcess.Database jackcessDatabase;
@@ -63,6 +64,7 @@ public class MDBReader {
 			column.setLength(readLength(originalColumn));
 			column.setPrimary(isPrimaryColumn(tableName, originalColumn));
 			column.setAutoIncrement(originalColumn.isAutoNumber());
+			column.setRequired(column.isPrimary() || (Boolean) readColumnProperty(originalColumn, "Required", false));
 			if ( column.getDataType() == DataType.DOUBLE )
 				column.setPrecision(precision(originalColumn));
 			columns.add(column);
@@ -71,19 +73,18 @@ public class MDBReader {
 	}
 
 	private int precision(com.healthmarketscience.jackcess.Column originalColumn) throws IOException {
-		int precision = 5;
-		if ( readColumnProperty(originalColumn, "DecimalPlaces") != null ) {
-			precision = (Byte) readColumnProperty(originalColumn, "DecimalPlaces");
-			if (precision <= 0)
-				precision = 5;
-		}
+		int precision = (Byte) readColumnProperty(originalColumn, "DecimalPlaces", DEFAULT_PRECISION);
+		if (precision <= 0)
+			precision = DEFAULT_PRECISION;
 		return precision;
 	}
 
-	private Object readColumnProperty(com.healthmarketscience.jackcess.Column column, String propertyName)
-			throws IOException {
+	private Object readColumnProperty(com.healthmarketscience.jackcess.Column column, String propertyName,
+									  Object defaultValue) throws IOException {
 		PropertyMap.Property property = column.getProperties().get(propertyName);
-		return property.getValue();
+		if ( property != null )
+			return property.getValue();
+		return defaultValue;
 	}
 
 	private int readLength(com.healthmarketscience.jackcess.Column originalColumn) throws SQLException {
