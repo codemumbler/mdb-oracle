@@ -15,6 +15,9 @@ public class MDBReader {
 	private static final int LONG_INTEGER = 4;
 	private static final int MEMO = -1;
 	private static final int INTEGER = 5;
+	public static final int DATE_TIME = 93;
+	private static final int DOUBLE = 8;
+	private static final int BOOLEAN = 16;
 
 	private Database database;
 	private com.healthmarketscience.jackcess.Database jackcessDatabase;
@@ -103,6 +106,12 @@ public class MDBReader {
 				return DataType.LONG;
 			case MEMO:
 				return DataType.MEMO;
+			case DATE_TIME:
+				return DataType.DATE_TIME;
+			case DOUBLE:
+				return DataType.DOUBLE;
+			case BOOLEAN:
+				return DataType.BOOLEAN;
 			default:
 				return null;
 		}

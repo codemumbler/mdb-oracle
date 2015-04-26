@@ -105,6 +105,27 @@ public class MDBReaderTest {
 	}
 
 	@Test
+	public void dateTimeDataType() {
+		setUpSimpleDatabase();
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 2);
+		Assert.assertEquals(DataType.DATE_TIME, column.getDataType());
+	}
+
+	@Test
+	public void doubleDataType() {
+		setUpSimpleDatabase();
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 7);
+		Assert.assertEquals(DataType.DOUBLE, column.getDataType());
+	}
+
+	@Test
+	public void booleanDataType() {
+		setUpSimpleDatabase();
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 4);
+		Assert.assertEquals(DataType.BOOLEAN, column.getDataType());
+	}
+
+	@Test
 	public void memoLength() {
 		setUpSimpleDatabase();
 		Assert.assertEquals(0, getTableColumn(SIMPLE_VALUES_TABLE, 1).getLength());
@@ -139,7 +160,7 @@ public class MDBReaderTest {
 	}
 
 	@Test
-	public void autoIncrementingColumnMadeIntoPrimary() {
+	public void autoIncrementingColumnMadeIntoPrimaryWhenNonExists() {
 		setUpMDBReader("badExamples.accdb");
 		table = database.getTables().get(0);
 		Column column = getTableColumn(0, 0);
