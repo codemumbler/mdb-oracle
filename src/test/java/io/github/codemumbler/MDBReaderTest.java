@@ -220,6 +220,26 @@ public class MDBReaderTest {
 		Assert.assertEquals(1, table.getRows().size());
 	}
 
+	@Test
+	public void simpleDataColumns() {
+		setUpSimpleDatabase();
+		Assert.assertEquals("ID,label,description", columnToString(table.getRows().get(0).getColumns()));
+	}
+
+	@Test
+	public void simpleData() {
+		setUpSimpleDatabase();
+		Assert.assertEquals("1,label1,description1", rowDataToString(table.getRows().get(0)));
+	}
+
+	private String rowDataToString(Row row) {
+		String data = "";
+		for ( Column column : row.getColumns() ) {
+			data += row.get(column) + ",";
+		}
+		return data.substring(0, data.length() - 1);
+	}
+
 	private Column getTableColumn(int columnIndex) {
 		return database.getTables().get(SIMPLE_TABLE).getColumns().get(columnIndex);
 	}
