@@ -1,0 +1,45 @@
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>io.github.codemumbler</groupId>
+	<version>1.0</version>
+	<artifactId>mdb-oracle-converter</artifactId>
+	<packaging>jar</packaging>
+	<name>MDB to Oracle Converter</name>
+	<description>
+		A Java library that converts MS Access MDB files to Oracle ready SQL script.
+	</description>
+
+	<scm>
+		<connection>scm:git:git@github.com:codemumbler/mdb-oracle.git</connection>
+		<developerConnection>scm:git:git@github.com:codemumbler/mdb-oracle.git</developerConnection>
+		<url>git@github.com:codemumbler/mdb-oracle.git</url>
+	</scm>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.healthmarketscience.jackcess</groupId>
+			<artifactId>jackcess</artifactId>
+			<version>2.0.8</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.2</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
