@@ -79,90 +79,93 @@ public class MDBReaderTest {
 	@Test
 	public void longIntegerDataType() {
 		setUpSimpleDatabase();
-		Column column = getColumn(ID_COLUMN);
+		Column column = getTableColumn(ID_COLUMN);
 		Assert.assertEquals(DataType.LONG, column.getDataType());
 	}
 
 	@Test
 	public void textDataType() {
 		setUpSimpleDatabase();
-		Column column = getColumn(LABEL_COLUMN);
+		Column column = getTableColumn(LABEL_COLUMN);
 		Assert.assertEquals(DataType.TEXT, column.getDataType());
 	}
 
 	@Test
 	public void memoDataType() {
 		setUpSimpleDatabase();
-		table = database.getTables().get(SIMPLE_VALUES_TABLE);
-		Assert.assertEquals(DataType.MEMO, getColumn(1).getDataType());
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 1);
+		Assert.assertEquals(DataType.MEMO, column.getDataType());
 	}
 
 	@Test
 	public void integerDataType() {
 		setUpSimpleDatabase();
-		table = database.getTables().get(SIMPLE_VALUES_TABLE);
-		Assert.assertEquals(DataType.INTEGER, getColumn(6).getDataType());
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 6);
+		Assert.assertEquals(DataType.INTEGER, column.getDataType());
 	}
 
 	@Test
 	public void memoLength() {
 		setUpSimpleDatabase();
-		table = database.getTables().get(SIMPLE_VALUES_TABLE);
-		Assert.assertEquals(0, getColumn(1).getLength());
+		Assert.assertEquals(0, getTableColumn(SIMPLE_VALUES_TABLE, 1).getLength());
 	}
 
 	@Test
 	public void primaryColumn() {
 		setUpSimpleDatabase();
-		Column column = getColumn(ID_COLUMN);
+		Column column = getTableColumn(ID_COLUMN);
 		Assert.assertTrue(column.isPrimary());
 	}
 
 	@Test
 	public void notPrimaryColumn() {
 		setUpSimpleDatabase();
-		Column column = getColumn(LABEL_COLUMN);
+		Column column = getTableColumn(LABEL_COLUMN);
 		Assert.assertFalse(column.isPrimary());
 	}
 
 	@Test
 	public void autoIncrements() {
 		setUpSimpleDatabase();
-		Column column = getColumn(ID_COLUMN);
+		Column column = getTableColumn(ID_COLUMN);
 		Assert.assertTrue(column.isAutoIncrement());
 	}
 
 	@Test
 	public void nonAutoIncrement() {
 		setUpSimpleDatabase();
-		Column column = getColumn(LABEL_COLUMN);
+		Column column = getTableColumn(LABEL_COLUMN);
 		Assert.assertFalse(column.isAutoIncrement());
 	}
 
 	@Test
 	public void autoIncrementingColumnMadeIntoPrimary() {
 		setUpMDBReader("badExamples.accdb");
-		Table table = database.getTables().get(0);
-		Column column = table.getColumns().get(0);
+		table = database.getTables().get(0);
+		Column column = getTableColumn(0, 0);
 		Assert.assertTrue(column.isPrimary());
 	}
 
 	@Test
 	public void longIntegerColumnLength() {
 		setUpSimpleDatabase();
-		Column column = getColumn(ID_COLUMN);
+		Column column = getTableColumn(SIMPLE_TABLE, ID_COLUMN);
 		Assert.assertEquals(9, column.getLength());
 	}
 
 	@Test
 	public void textColumnLength() {
 		setUpSimpleDatabase();
-		Column column = getColumn(LABEL_COLUMN);
+		Column column = getTableColumn(LABEL_COLUMN);
 		Assert.assertEquals(510, column.getLength());
 	}
 
-	private Column getColumn(int columnIndex) {
-		return table.getColumns().get(columnIndex);
+	private Column getTableColumn(int columnIndex) {
+		return database.getTables().get(SIMPLE_TABLE).getColumns().get(columnIndex);
+	}
+
+	private Column getTableColumn(int tableIndex, int columnIndex) {
+		return database.getTables().get(tableIndex).getColumns().get(columnIndex);
 	}
 
 	private String columnToString(List<Column> columns) {
