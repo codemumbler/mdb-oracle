@@ -10,9 +10,13 @@ import java.util.List;
 public class MDBReaderTest {
 
 	private static final String SIMPLE_DATABASE_FILE = "simple.accdb";
-	public static final int SIMPLE_TABLE = 0;
+	private static final int SIMPLE_TABLE = 0;
+	private static final int ID_COLUMN = 0;
+	private static final int LABEL_COLUMN = 1;
+
 	private MDBReader reader;
 	private Database database;
+	private Table table;
 
 	@Test(expected = IllegalArgumentException.class)
 	public void noMDBFileSpecified() throws IOException {
@@ -50,23 +54,39 @@ public class MDBReaderTest {
 
 	@Test
 	public void tableName() {
-		setUpMDBReader(SIMPLE_DATABASE_FILE);
-		Table table = database.getTables().get(SIMPLE_TABLE);
+		setUpSimpleDatabase();
 		Assert.assertEquals("SimpleTable", table.getName());
+	}
+
+	private void setUpSimpleDatabase() {
+		setUpMDBReader(SIMPLE_DATABASE_FILE);
+		table = database.getTables().get(SIMPLE_TABLE);
 	}
 
 	@Test
 	public void columnCount() {
-		setUpMDBReader(SIMPLE_DATABASE_FILE);
-		Table table = database.getTables().get(SIMPLE_TABLE);
+		setUpSimpleDatabase();
 		Assert.assertEquals(3, table.getColumns().size());
 	}
 
 	@Test
 	public void columnNames() {
-		setUpMDBReader(SIMPLE_DATABASE_FILE);
-		Table table = database.getTables().get(SIMPLE_TABLE);
+		setUpSimpleDatabase();
 		Assert.assertEquals("ID,label,description", columnToString(table.getColumns()));
+	}
+
+	@Test
+	public void longIntegerDataType() {
+		setUpSimpleDatabase();
+		Column column = table.getColumns().get(ID_COLUMN);
+		Assert.assertEquals(DataType.LONG, column.getDataType());
+	}
+
+	@Test
+	public void textDataType() {
+		setUpSimpleDatabase();
+		Column column = table.getColumns().get(LABEL_COLUMN);
+		Assert.assertEquals(DataType.TEXT, column.getDataType());
 	}
 
 	private String columnToString(List<Column> columns) {
