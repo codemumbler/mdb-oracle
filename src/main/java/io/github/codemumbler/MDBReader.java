@@ -11,8 +11,11 @@ import java.util.List;
 
 public class MDBReader {
 
-	public static final int TEXT = 12;
-	public static final int LONG_INTEGER = 4;
+	private static final int TEXT = 12;
+	private static final int LONG_INTEGER = 4;
+	private static final int MEMO = -1;
+	private static final int INTEGER = 5;
+
 	private Database database;
 	private com.healthmarketscience.jackcess.Database jackcessDatabase;
 
@@ -55,6 +58,7 @@ public class MDBReader {
 			column.setDataType(readDataType(originalColumn));
 			column.setLength(readLength(originalColumn));
 			column.setPrimary(isPrimaryColumn(tableName, originalColumn));
+			column.setAutoIncrement(originalColumn.isAutoNumber());
 			columns.add(column);
 		}
 		return columns;
@@ -93,9 +97,14 @@ public class MDBReader {
 		switch ( originalColumn.getSQLType() ) {
 			case TEXT:
 				return DataType.TEXT;
+			case INTEGER:
+				return DataType.INTEGER;
 			case LONG_INTEGER:
 				return DataType.LONG;
+			case MEMO:
+				return DataType.MEMO;
+			default:
+				return null;
 		}
-		return null;
 	}
 }

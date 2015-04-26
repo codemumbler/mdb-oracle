@@ -13,6 +13,7 @@ public class MDBReaderTest {
 	private static final int SIMPLE_TABLE = 0;
 	private static final int ID_COLUMN = 0;
 	private static final int LABEL_COLUMN = 1;
+	private static final int SIMPLE_VALUES_TABLE = 1;
 
 	private MDBReader reader;
 	private Database database;
@@ -90,6 +91,27 @@ public class MDBReaderTest {
 	}
 
 	@Test
+	public void memoDataType() {
+		setUpSimpleDatabase();
+		table = database.getTables().get(SIMPLE_VALUES_TABLE);
+		Assert.assertEquals(DataType.MEMO, getColumn(1).getDataType());
+	}
+
+	@Test
+	public void integerDataType() {
+		setUpSimpleDatabase();
+		table = database.getTables().get(SIMPLE_VALUES_TABLE);
+		Assert.assertEquals(DataType.INTEGER, getColumn(6).getDataType());
+	}
+
+	@Test
+	public void memoLength() {
+		setUpSimpleDatabase();
+		table = database.getTables().get(SIMPLE_VALUES_TABLE);
+		Assert.assertEquals(0, getColumn(1).getLength());
+	}
+
+	@Test
 	public void primaryColumn() {
 		setUpSimpleDatabase();
 		Column column = getColumn(ID_COLUMN);
@@ -101,6 +123,20 @@ public class MDBReaderTest {
 		setUpSimpleDatabase();
 		Column column = getColumn(LABEL_COLUMN);
 		Assert.assertFalse(column.isPrimary());
+	}
+
+	@Test
+	public void autoIncrements() {
+		setUpSimpleDatabase();
+		Column column = getColumn(ID_COLUMN);
+		Assert.assertTrue(column.isAutoIncrement());
+	}
+
+	@Test
+	public void nonAutoIncrement() {
+		setUpSimpleDatabase();
+		Column column = getColumn(LABEL_COLUMN);
+		Assert.assertFalse(column.isAutoIncrement());
 	}
 
 	@Test

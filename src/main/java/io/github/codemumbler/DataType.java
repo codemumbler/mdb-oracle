@@ -2,5 +2,5 @@ package io.github.codemumbler;
 
 public enum DataType {
 	LONG,
-	TEXT
+	MEMO, INTEGER, TEXT
 }

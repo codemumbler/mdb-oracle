@@ -6,6 +6,7 @@ public class Column {
 	private DataType dataType;
 	private boolean primary;
 	private int length;
+	private boolean autoIncrement;
 
 	public String getName() {
 		return name;
@@ -37,5 +38,13 @@ public class Column {
 
 	public void setLength(int length) {
 		this.length = length;
+	}
+
+	public boolean isAutoIncrement() {
+		return autoIncrement;
+	}
+
+	public void setAutoIncrement(boolean autoIncrement) {
+		this.autoIncrement = autoIncrement;
 	}
 }
