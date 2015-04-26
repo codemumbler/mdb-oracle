@@ -5,6 +5,7 @@ public class Column {
 	private String name;
 	private DataType dataType;
 	private boolean primary;
+	private int length;
 
 	public String getName() {
 		return name;
@@ -28,5 +29,13 @@ public class Column {
 
 	public void setPrimary(boolean primary) {
 		this.primary = primary;
+	}
+
+	public int getLength() {
+		return length;
+	}
+
+	public void setLength(int length) {
+		this.length = length;
 	}
 }

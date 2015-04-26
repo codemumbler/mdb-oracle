@@ -53,10 +53,15 @@ public class MDBReader {
 			Column column = new Column();
 			column.setName(originalColumn.getName());
 			column.setDataType(readDataType(originalColumn));
+			column.setLength(readLength(originalColumn));
 			column.setPrimary(isPrimaryColumn(tableName, originalColumn));
 			columns.add(column);
 		}
 		return columns;
+	}
+
+	private int readLength(com.healthmarketscience.jackcess.Column originalColumn) {
+		return 9;
 	}
 
 	private boolean isPrimaryColumn(String tableName, com.healthmarketscience.jackcess.Column originalColumn)

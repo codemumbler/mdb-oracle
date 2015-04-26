@@ -111,6 +111,13 @@ public class MDBReaderTest {
 		Assert.assertTrue(column.isPrimary());
 	}
 
+	@Test
+	public void longIntegerColumnLength() {
+		setUpSimpleDatabase();
+		Column column = getColumn(ID_COLUMN);
+		Assert.assertEquals(9, column.getLength());
+	}
+
 	private Column getColumn(int columnIndex) {
 		return table.getColumns().get(columnIndex);
 	}
