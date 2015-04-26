@@ -1,6 +1,7 @@
 package io.github.codemumbler;
 
 import com.healthmarketscience.jackcess.DatabaseBuilder;
+import com.healthmarketscience.jackcess.Index;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,9 +53,33 @@ public class MDBReader {
 			Column column = new Column();
 			column.setName(originalColumn.getName());
 			column.setDataType(readDataType(originalColumn));
+			column.setPrimary(isPrimaryColumn(tableName, originalColumn));
 			columns.add(column);
 		}
 		return columns;
+	}
+
+	private boolean isPrimaryColumn(String tableName, com.healthmarketscience.jackcess.Column originalColumn)
+			throws IOException {
+		for ( Index index : jackcessDatabase.getTable(tableName).getIndexes() ) {
+			if (index.isPrimaryKey()) {
+				for (Index.Column indexColumn : index.getColumns()) {
+					if (indexColumn.getName().equals(originalColumn.getName())) {
+						return true;
+					}
+				}
+			}
+		}
+		boolean hasPrimaryKey = false;
+		for ( Index index : jackcessDatabase.getTable(tableName).getIndexes() ) {
+			if (index.isPrimaryKey()) {
+				hasPrimaryKey = true;
+			}
+		}
+		if ( originalColumn.isAutoNumber() && !hasPrimaryKey ) {
+			return true;
+		}
+		return false;
 	}
 
 	private DataType readDataType(com.healthmarketscience.jackcess.Column originalColumn) throws SQLException {

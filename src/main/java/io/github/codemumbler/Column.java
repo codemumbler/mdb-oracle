@@ -4,6 +4,7 @@ public class Column {
 
 	private String name;
 	private DataType dataType;
+	private boolean primary;
 
 	public String getName() {
 		return name;
@@ -19,5 +20,13 @@ public class Column {
 
 	public void setDataType(DataType dataType) {
 		this.dataType = dataType;
+	}
+
+	public boolean isPrimary() {
+		return primary;
+	}
+
+	public void setPrimary(boolean primary) {
+		this.primary = primary;
 	}
 }

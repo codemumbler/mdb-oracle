@@ -78,15 +78,41 @@ public class MDBReaderTest {
 	@Test
 	public void longIntegerDataType() {
 		setUpSimpleDatabase();
-		Column column = table.getColumns().get(ID_COLUMN);
+		Column column = getColumn(ID_COLUMN);
 		Assert.assertEquals(DataType.LONG, column.getDataType());
 	}
 
 	@Test
 	public void textDataType() {
 		setUpSimpleDatabase();
-		Column column = table.getColumns().get(LABEL_COLUMN);
+		Column column = getColumn(LABEL_COLUMN);
 		Assert.assertEquals(DataType.TEXT, column.getDataType());
+	}
+
+	@Test
+	public void primaryColumn() {
+		setUpSimpleDatabase();
+		Column column = getColumn(ID_COLUMN);
+		Assert.assertTrue(column.isPrimary());
+	}
+
+	@Test
+	public void notPrimaryColumn() {
+		setUpSimpleDatabase();
+		Column column = getColumn(LABEL_COLUMN);
+		Assert.assertFalse(column.isPrimary());
+	}
+
+	@Test
+	public void autoIncrementingColumnMadeIntoPrimary() {
+		setUpMDBReader("badExamples.accdb");
+		Table table = database.getTables().get(0);
+		Column column = table.getColumns().get(0);
+		Assert.assertTrue(column.isPrimary());
+	}
+
+	private Column getColumn(int columnIndex) {
+		return table.getColumns().get(columnIndex);
 	}
 
 	private String columnToString(List<Column> columns) {
