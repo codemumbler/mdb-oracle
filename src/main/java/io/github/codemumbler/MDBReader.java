@@ -25,7 +25,7 @@ public class MDBReader {
 	public Database loadDatabase() {
 		try {
 			readTables();
-		} catch (IOException e) {
+		} catch (IOException ignored) {
 		}
 		return database;
 	}
@@ -34,8 +34,22 @@ public class MDBReader {
 		List<Table> tables = new ArrayList<>(jackcessDatabase.getTableNames().size());
 		for (String tableName : jackcessDatabase.getTableNames()) {
 			Table table = new Table();
+			table.setName(tableName);
+			table.setColumns(readTableColumns(tableName));
 			tables.add(table);
 		}
 		database.setTables(tables);
+	}
+
+	private List<Column> readTableColumns(String tableName) throws IOException {
+		List<com.healthmarketscience.jackcess.Column> originalColumns = (List<com.healthmarketscience.jackcess.Column>)
+				jackcessDatabase.getTable(tableName).getColumns();
+		List<Column> columns = new ArrayList<>(originalColumns.size());
+		for ( com.healthmarketscience.jackcess.Column originalColumn : originalColumns ) {
+			Column column = new Column();
+			column.setName(originalColumn.getName());
+			columns.add(column);
+		}
+		return columns;
 	}
 }
