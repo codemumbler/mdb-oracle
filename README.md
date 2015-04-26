@@ -1,2 +1,2 @@
-# dmb-oracle
+# mdb-oracle
 Converts MDB files in Oracle SQL scripts.
