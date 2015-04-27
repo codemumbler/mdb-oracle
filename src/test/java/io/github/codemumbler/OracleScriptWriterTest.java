@@ -52,7 +52,8 @@ public class OracleScriptWriterTest {
 
 	@Test
 	public void doubleDataType() {
-		addColumnToTable("testDouble", new DoubleDataType(), 5, 2, false, false);
+		Column column = addColumnToTable("testDouble", new DoubleDataType(), 5);
+		column.setPrecision(2);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_DOUBLE NUMBER(5,2)\n" +
 				");\n", writer.writeOneTable(table));
@@ -82,7 +83,8 @@ public class OracleScriptWriterTest {
 
 	@Test
 	public void requiredColumn() {
-		addColumnToTable("testID", new IntegerDataType(), 5, -1, true, false);
+		Column column = addColumnToTable("testID", new IntegerDataType(), 5);
+		column.setRequired(true);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_ID NUMBER(5) NOT NULL\n" +
 				");\n", writer.writeOneTable(table));
@@ -108,28 +110,23 @@ public class OracleScriptWriterTest {
 
 	@Test
 	public void primaryColumn() {
-		addColumnToTable("testColumnID", new IntegerDataType(), 5, 0, true, true);
+		Column column = addColumnToTable("testColumnID", new IntegerDataType(), 5);
+		column.setPrimary(true);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
-				"\tTEST_COLUMN_ID NUMBER(5) NOT NULL\n" +
+				"\tTEST_COLUMN_ID NUMBER(5)\n" +
 				");\n" +
 				"\nCREATE UNIQUE INDEX TEST_TABLE_UK1 ON TEST_TABLE (TEST_COLUMN_ID);\n" +
 				"\nALTER TABLE TEST_TABLE ADD CONSTRAINT TEST_TABLE_PK PRIMARY KEY (TEST_COLUMN_ID) ENABLE;\n",
 				writer.writeOneTable(table));
 	}
 
-	private void addColumnToTable(String name, DataType type, int length, int precision, boolean required, boolean primary) {
+	private Column addColumnToTable(String name, DataType type, int length) {
 		Column column = new Column();
 		column.setName(name);
 		column.setDataType(type);
 		column.setLength(length);
-		column.setPrecision(precision);
-		column.setRequired(required);
-		column.setPrimary(primary);
 		table.addColumn(column);
-	}
-
-	private void addColumnToTable(String name, DataType type, int length) {
-		addColumnToTable(name, type, length, -1, false, false);
+		return column;
 	}
 
 	@Test
