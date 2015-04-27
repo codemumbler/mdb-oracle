@@ -13,6 +13,18 @@ public class OracleScriptWriter {
 			"SELECT", "WHERE", "FROM");
 	private static final String UNIQUE = "\nCREATE UNIQUE INDEX %1$s_UK%3$d ON %1$s (%2$s);\n";
 	private static final String PRIMARY = "\nALTER TABLE %1$s ADD CONSTRAINT %1$s_PK PRIMARY KEY (%2$s) ENABLE;\n";
+	private static final String SEQUENCE = "\nCREATE SEQUENCE %s_SEQ MINVALUE 1 MAXVALUE %s INCREMENT BY 1 START WITH %d NOCACHE NOORDER NOCYCLE;\n";
+	private static final String TRIGGER = "\nCREATE OR REPLACE TRIGGER %1$s_TRIG\n" +
+			"BEFORE INSERT ON %1$s\n" +
+			"FOR EACH ROW BEGIN\n" +
+			"\tIF :NEW.%2$s IS NULL THEN\n" +
+			"\t\tSELECT %1$s_SEQ.nextVal\n" +
+			"\t\tINTO :NEW.%2$s\n" +
+			"\t\tFROM dual;\n" +
+			"\tEND IF;\n" +
+			"END;\n" +
+			"/\n" +
+			"ALTER TRIGGER %1$s_TRIG ENABLE;";
 
 	private final Database database;
 
@@ -50,6 +62,11 @@ public class OracleScriptWriter {
 			if ( column.isPrimary() ) {
 				tableAlterationsScript.append(String.format(UNIQUE, tableName, columnName, uniqueIndexNumber++));
 				tableAlterationsScript.append(String.format(PRIMARY, tableName, columnName));
+			}
+			if ( column.isAutoIncrement() ) {
+				String maxSequenceValue = new String(new char[column.getLength()]).replace("\0", "9");
+				tableAlterationsScript.append(String.format(SEQUENCE, tableName, maxSequenceValue, table.getNextValue()));
+				tableAlterationsScript.append(String.format(TRIGGER, tableName, columnName));
 			}
 		}
 		tableCreateScript = tableCreateScript.deleteCharAt(tableCreateScript.length() - 2);

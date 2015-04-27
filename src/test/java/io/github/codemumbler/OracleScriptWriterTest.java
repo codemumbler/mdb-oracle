@@ -113,10 +113,77 @@ public class OracleScriptWriterTest {
 		Column column = addColumnToTable("testColumnID", new IntegerDataType(), 5);
 		column.setPrimary(true);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
-				"\tTEST_COLUMN_ID NUMBER(5)\n" +
-				");\n" +
-				"\nCREATE UNIQUE INDEX TEST_TABLE_UK1 ON TEST_TABLE (TEST_COLUMN_ID);\n" +
-				"\nALTER TABLE TEST_TABLE ADD CONSTRAINT TEST_TABLE_PK PRIMARY KEY (TEST_COLUMN_ID) ENABLE;\n",
+						"\tTEST_COLUMN_ID NUMBER(5)\n" +
+						");\n" +
+						"\nCREATE UNIQUE INDEX TEST_TABLE_UK1 ON TEST_TABLE (TEST_COLUMN_ID);\n" +
+						"\nALTER TABLE TEST_TABLE ADD CONSTRAINT TEST_TABLE_PK PRIMARY KEY (TEST_COLUMN_ID) ENABLE;\n",
+				writer.writeOneTable(table));
+	}
+
+	@Test
+	public void sequenceForAutoIncrement() {
+		Column column = addColumnToTable("testColumnID", new IntegerDataType(), 5);
+		column.setAutoIncrement(true);
+		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
+						"\tTEST_COLUMN_ID NUMBER(5)\n" +
+						");\n" +
+						"\nCREATE SEQUENCE TEST_TABLE_SEQ MINVALUE 1 MAXVALUE 99999 INCREMENT BY 1 START WITH 0 NOCACHE NOORDER NOCYCLE;\n" +
+						"\nCREATE OR REPLACE TRIGGER TEST_TABLE_TRIG\n" +
+						"BEFORE INSERT ON TEST_TABLE\n" +
+						"FOR EACH ROW BEGIN\n" +
+						"\tIF :NEW.TEST_COLUMN_ID IS NULL THEN\n" +
+						"\t\tSELECT TEST_TABLE_SEQ.nextVal\n" +
+						"\t\tINTO :NEW.TEST_COLUMN_ID\n" +
+						"\t\tFROM dual;\n" +
+						"\tEND IF;\n" +
+						"END;\n" +
+						"/\n" +
+						"ALTER TRIGGER TEST_TABLE_TRIG ENABLE;",
+				writer.writeOneTable(table));
+	}
+
+	@Test
+	public void sequenceStartingValue() {
+		Column column = addColumnToTable("testColumnID", new IntegerDataType(), 5);
+		column.setAutoIncrement(true);
+		table.setNextValue(2);
+		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
+						"\tTEST_COLUMN_ID NUMBER(5)\n" +
+						");\n" +
+						"\nCREATE SEQUENCE TEST_TABLE_SEQ MINVALUE 1 MAXVALUE 99999 INCREMENT BY 1 START WITH 2 NOCACHE NOORDER NOCYCLE;\n" +
+						"\nCREATE OR REPLACE TRIGGER TEST_TABLE_TRIG\n" +
+						"BEFORE INSERT ON TEST_TABLE\n" +
+						"FOR EACH ROW BEGIN\n" +
+						"\tIF :NEW.TEST_COLUMN_ID IS NULL THEN\n" +
+						"\t\tSELECT TEST_TABLE_SEQ.nextVal\n" +
+						"\t\tINTO :NEW.TEST_COLUMN_ID\n" +
+						"\t\tFROM dual;\n" +
+						"\tEND IF;\n" +
+						"END;\n" +
+						"/\n" +
+						"ALTER TRIGGER TEST_TABLE_TRIG ENABLE;",
+				writer.writeOneTable(table));
+	}
+
+	@Test
+	public void sequenceMaximumValue() {
+		Column column = addColumnToTable("testColumnID", new IntegerDataType(), 9);
+		column.setAutoIncrement(true);
+		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
+						"\tTEST_COLUMN_ID NUMBER(9)\n" +
+						");\n" +
+						"\nCREATE SEQUENCE TEST_TABLE_SEQ MINVALUE 1 MAXVALUE 999999999 INCREMENT BY 1 START WITH 0 NOCACHE NOORDER NOCYCLE;\n" +
+						"\nCREATE OR REPLACE TRIGGER TEST_TABLE_TRIG\n" +
+						"BEFORE INSERT ON TEST_TABLE\n" +
+						"FOR EACH ROW BEGIN\n" +
+						"\tIF :NEW.TEST_COLUMN_ID IS NULL THEN\n" +
+						"\t\tSELECT TEST_TABLE_SEQ.nextVal\n" +
+						"\t\tINTO :NEW.TEST_COLUMN_ID\n" +
+						"\t\tFROM dual;\n" +
+						"\tEND IF;\n" +
+						"END;\n" +
+						"/\n" +
+						"ALTER TRIGGER TEST_TABLE_TRIG ENABLE;",
 				writer.writeOneTable(table));
 	}
 
