@@ -280,6 +280,12 @@ public class MDBReaderTest {
 		Assert.assertEquals(0, database.getTable("notAGoodForeignKey").getForeignKeys().size());
 	}
 
+	@Test
+	public void maxPrimaryKeyValueForBuildingSequence() {
+		setUpSimpleDatabase();
+		Assert.assertEquals(2, database.getTable("SimpleTable").getNextValue());
+	}
+
 	private ForeignKey simpleValesForeignKeys(int index) {
 		return database.getTables().get(SIMPLE_VALUES_TABLE).getForeignKeys().get(index);
 	}

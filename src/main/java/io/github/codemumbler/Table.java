@@ -9,6 +9,7 @@ public class Table {
 	private List<Column> columns = new ArrayList<>();
 	private List<Row> rows;
 	private List<ForeignKey> foreignKeys = new ArrayList<>();
+	private long nextValue;
 
 	public String getName() {
 		return name;
@@ -52,5 +53,13 @@ public class Table {
 
 	public void addAllColumns(List<Column> columns) {
 		this.columns.addAll(columns);
+	}
+
+	public long getNextValue() {
+		return nextValue;
+	}
+
+	public void setNextValue(long nextValue) {
+		this.nextValue = nextValue;
 	}
 }

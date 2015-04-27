@@ -91,8 +91,21 @@ public class MDBReader {
 			table.setName(tableName);
 			table.addAllColumns(readTableColumns(tableName));
 			table.setRows(readTableData(table));
+			table.setNextValue(findMaxPrimaryKeyValue(table) + 1);
 			database.addTable(table);
 		}
+	}
+
+	private long findMaxPrimaryKeyValue(Table table) {
+		long maxValue = 0;
+		Column primaryColumn = null;
+		for ( Column column : table.getColumns() )
+			if ( column.isPrimary() )
+				primaryColumn = column;
+		for ( Row row : table.getRows() ) {
+			maxValue = Math.max(maxValue, (Integer) row.get(primaryColumn));
+		}
+		return maxValue;
 	}
 
 	private List<Row> readTableData(Table table) throws IOException {
