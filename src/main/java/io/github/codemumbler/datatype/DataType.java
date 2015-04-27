@@ -16,7 +16,5 @@ public abstract class DataType {
 		return false;
 	}
 
-	public String getOracleType() {
-		return "NUMBER";
-	}
+	public abstract String getOracleType();
 }

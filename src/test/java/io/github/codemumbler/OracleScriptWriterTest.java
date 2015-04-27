@@ -74,6 +74,12 @@ public class OracleScriptWriterTest {
 				");\n", writer.writeOneTable(table));
 	}
 
+	@Test(expected = OracleScriptWriterException.class)
+	public void unknownDataTypeThrowsException() {
+		addColumnToTable("testNull", new NullDataType(), 1);
+		writer.writeOneTable(table);
+	}
+
 	@Test
 	public void requiredColumn() {
 		addColumnToTable("testID", new IntegerDataType(), 5, -1, true);

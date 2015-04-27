@@ -1,5 +1,11 @@
 package io.github.codemumbler.datatype;
 
-public class IntegerDataType extends DataType {
+import com.healthmarketscience.jackcess.Column;
 
+public class IntegerDataType extends NumberDataType {
+
+	@Override
+	public int getLength(Column originalColumn) {
+		return 5;
+	}
 }
