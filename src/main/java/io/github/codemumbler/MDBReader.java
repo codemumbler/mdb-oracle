@@ -20,6 +20,7 @@ public class MDBReader {
 	private static final int DEFAULT_PRECISION = 5;
 
 	private Database database;
+	private DataTypeFactory factory = new DataTypeFactory();
 	private com.healthmarketscience.jackcess.Database jackcessDatabase;
 
 	public MDBReader(File mdbFile) throws IOException {
@@ -43,8 +44,7 @@ public class MDBReader {
 
 	private void buildForeignKeys() throws IOException {
 		for (String tableName : jackcessDatabase.getTableNames()) {
-			List<com.healthmarketscience.jackcess.Column> originalColumns = (List<com.healthmarketscience.jackcess.Column>)
-					jackcessDatabase.getTable(tableName).getColumns();
+			List<com.healthmarketscience.jackcess.Column> originalColumns = getColumns(tableName);
 			for (com.healthmarketscience.jackcess.Column column : originalColumns ) {
 				String lookupColumn = (String) readColumnProperty(column, "RowSourceType", "");
 				if ( lookupColumn.equals("Table/Query") ) {
@@ -72,6 +72,11 @@ public class MDBReader {
 				database.getTable(relationship.getToTable().getName()).addForeignKey(foreignKey);
 			}
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<com.healthmarketscience.jackcess.Column> getColumns(String tableName) throws IOException {
+		return (List<com.healthmarketscience.jackcess.Column>) jackcessDatabase.getTable(tableName).getColumns();
 	}
 
 	private String parseSQL(com.healthmarketscience.jackcess.Column column, String regex) throws IOException {
@@ -118,8 +123,7 @@ public class MDBReader {
 	}
 
 	private List<Column> readTableColumns(String tableName) throws IOException, SQLException {
-		List<com.healthmarketscience.jackcess.Column> originalColumns = (List<com.healthmarketscience.jackcess.Column>)
-				jackcessDatabase.getTable(tableName).getColumns();
+		List<com.healthmarketscience.jackcess.Column> originalColumns = getColumns(tableName);
 		List<Column> columns = new ArrayList<>(originalColumns.size());
 		for ( com.healthmarketscience.jackcess.Column originalColumn : originalColumns ) {
 			Column column = new Column();
@@ -172,7 +176,6 @@ public class MDBReader {
 	}
 
 	private DataType readDataType(com.healthmarketscience.jackcess.Column originalColumn) throws SQLException {
-		DataTypeFactory factory = new DataTypeFactory();
 		return factory.createDataType(originalColumn.getSQLType());
 	}
 }

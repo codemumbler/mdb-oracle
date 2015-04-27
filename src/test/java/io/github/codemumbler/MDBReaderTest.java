@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -241,7 +242,16 @@ public class MDBReaderTest {
 		Row data = table.getRows().get(0);
 		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 2);
 		Date date = (Date) data.get(column);
-		Assert.assertEquals(1427860800000L, date.getTime());
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(Calendar.MONTH, 3);
+		calendar.set(Calendar.DAY_OF_MONTH, 1);
+		calendar.set(Calendar.YEAR, 2015);
+		calendar.set(Calendar.HOUR, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		calendar.set(Calendar.ZONE_OFFSET, 25200000);
+		Assert.assertEquals(calendar.getTimeInMillis(), date.getTime());
 	}
 
 	@Test
