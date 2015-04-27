@@ -34,7 +34,9 @@ public class OracleScriptWriter {
 				if ( column.getDataType().hasPrecision() )
 					tableCreateScript.append(",").append(column.getPrecision());
 				tableCreateScript.append(")");
-
+			}
+			if ( column.isRequired() ) {
+				tableCreateScript.append(" NOT NULL");
 			}
 			tableCreateScript.append(",\n");
 		}

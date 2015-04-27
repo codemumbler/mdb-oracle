@@ -79,6 +79,21 @@ public class OracleScriptWriterTest {
 	}
 
 	@Test
+	public void requiredColumn() {
+		Table table = new Table();
+		table.setName("testTable");
+		Column column = new Column();
+		column.setName("testID");
+		column.setDataType(new IntegerDataType());
+		column.setLength(5);
+		column.setRequired(true);
+		table.addColumn(column);
+		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
+				"\tTEST_ID NUMBER(5) NOT NULL\n" +
+				");\n", writer.writeOneTable(table));
+	}
+
+	@Test
 	public void oneTableTextColumn() {
 		Table table = new Table();
 		table.setName("testTable");
