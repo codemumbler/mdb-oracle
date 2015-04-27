@@ -17,4 +17,8 @@ public abstract class DataType {
 	}
 
 	public abstract String getOracleType();
+
+	public String writeValue(Object value) {
+		return "NULL";
+	}
 }

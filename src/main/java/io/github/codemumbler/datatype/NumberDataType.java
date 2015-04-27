@@ -6,4 +6,8 @@ public class NumberDataType extends DataType {
 	public String getOracleType() {
 		return "NUMBER";
 	}
+
+	public String writeValue(Object value) {
+		return value.toString();
+	}
 }

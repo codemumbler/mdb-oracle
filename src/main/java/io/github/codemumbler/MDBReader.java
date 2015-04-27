@@ -85,7 +85,7 @@ public class MDBReader {
 			Table table = new Table();
 			table.setName(tableName);
 			table.addAllColumns(readTableColumns(tableName));
-			table.setRows(readTableData(table));
+			readTableData(table);
 			table.setNextValue(findMaxPrimaryKeyValue(table) + 1);
 			database.addTable(table);
 		}
@@ -103,17 +103,15 @@ public class MDBReader {
 		return maxValue;
 	}
 
-	private List<Row> readTableData(Table table) throws IOException {
+	private void readTableData(Table table) throws IOException {
 		com.healthmarketscience.jackcess.Table sourceTable = jackcessDatabase.getTable(table.getName());
-		List<Row> rows = new ArrayList<>(sourceTable.getRowCount());
 		for ( com.healthmarketscience.jackcess.Row sourceRow : sourceTable ) {
 			Row row = new Row(table);
 			for ( Column column : table.getColumns() ) {
 				row.add(column, sourceRow.get(column.getName()));
 			}
-			rows.add(row);
+			table.addRow(row);
 		}
-		return rows;
 	}
 
 	private List<Column> readTableColumns(String tableName) throws IOException, SQLException {

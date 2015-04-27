@@ -25,6 +25,7 @@ public class OracleScriptWriter {
 			"END;\n" +
 			"/\n" +
 			"ALTER TRIGGER %1$s_TRIG ENABLE;";
+	private static final String INSERTION = "INSERT INTO %s(%s) VALUES (%s);\n";
 
 	private final Database database;
 
@@ -36,7 +37,7 @@ public class OracleScriptWriter {
 		return String.format(SCHEMA_CREATION, database.getSchemaName());
 	}
 
-	public String writeOneTable(Table table) {
+	public String writeTableScript(Table table) {
 		StringBuilder tableCreateScript = new StringBuilder("CREATE TABLE ");
 		StringBuilder tableAlterationsScript = new StringBuilder();
 		int uniqueIndexNumber = 1;
@@ -107,5 +108,34 @@ public class OracleScriptWriter {
 				return false;
 		}
 		return true;
+	}
+
+	public String writeTableInsertions(Table table) {
+		String tableName = cleanName(table.getName());
+		String columns = tableColumnsToString(table);
+		String values = rowValues(table.getRows().get(0));
+		return String.format(INSERTION, tableName, columns, values);
+	}
+
+	private String rowValues(Row row) {
+		StringBuilder builder = new StringBuilder();
+		for ( Column column : row.getColumns() ) {
+			if ( row.get(column) == null )
+				builder.append("NULL");
+			else
+				builder.append(column.getDataType().writeValue(row.get(column)));
+			builder.append(", ");
+		}
+		builder.delete(builder.length() - 2, builder.length());
+		return builder.toString();
+	}
+
+	private String tableColumnsToString(Table table) {
+		StringBuilder builder = new StringBuilder();
+		for ( Column column : table.getColumns() ) {
+			builder.append(cleanName(column.getName())).append(", ");
+		}
+		builder.delete(builder.length() - 2, builder.length());
+		return builder.toString();
 	}
 }

@@ -7,7 +7,7 @@ public class Table {
 
 	private String name;
 	private List<Column> columns = new ArrayList<>();
-	private List<Row> rows;
+	private List<Row> rows = new ArrayList<>();
 	private List<ForeignKey> foreignKeys = new ArrayList<>();
 	private long nextValue;
 
@@ -29,10 +29,6 @@ public class Table {
 
 	public List<Row> getRows() {
 		return rows;
-	}
-
-	public void setRows(List<Row> rows) {
-		this.rows = rows;
 	}
 
 	public List<ForeignKey> getForeignKeys() {
@@ -61,5 +57,9 @@ public class Table {
 
 	public void setNextValue(long nextValue) {
 		this.nextValue = nextValue;
+	}
+
+	public void addRow(Row row) {
+		rows.add(row);
 	}
 }

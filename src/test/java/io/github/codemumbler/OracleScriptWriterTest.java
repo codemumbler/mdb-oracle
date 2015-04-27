@@ -31,7 +31,7 @@ public class OracleScriptWriterTest {
 
 	@Test(expected = OracleScriptWriterException.class)
 	public void tableWithNoColumns() {
-		writer.writeOneTable(table);
+		writer.writeTableScript(table);
 	}
 
 	@Test
@@ -39,7 +39,7 @@ public class OracleScriptWriterTest {
 		addColumnToTable("testColumnID", new IntegerDataType(), 5);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_COLUMN_ID NUMBER(5)\n" +
-				");\n", writer.writeOneTable(table));
+				");\n", writer.writeTableScript(table));
 	}
 
 	@Test
@@ -47,7 +47,7 @@ public class OracleScriptWriterTest {
 		addColumnToTable("testMemo", new Memo(), -1);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_MEMO CLOB\n" +
-				");\n", writer.writeOneTable(table));
+				");\n", writer.writeTableScript(table));
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class OracleScriptWriterTest {
 		column.setPrecision(2);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_DOUBLE NUMBER(5,2)\n" +
-				");\n", writer.writeOneTable(table));
+				");\n", writer.writeTableScript(table));
 	}
 
 	@Test
@@ -64,7 +64,7 @@ public class OracleScriptWriterTest {
 		addColumnToTable("testBoolean", new BooleanDataType(), 1);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_BOOLEAN VARCHAR2(1)\n" +
-				");\n", writer.writeOneTable(table));
+				");\n", writer.writeTableScript(table));
 	}
 
 	@Test
@@ -72,13 +72,13 @@ public class OracleScriptWriterTest {
 		addColumnToTable("testDateTime", new DateTime(), -1);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_DATE_TIME TIMESTAMP\n" +
-				");\n", writer.writeOneTable(table));
+				");\n", writer.writeTableScript(table));
 	}
 
 	@Test(expected = OracleScriptWriterException.class)
 	public void unknownDataTypeThrowsException() {
 		addColumnToTable("testNull", new NullDataType(), -1);
-		writer.writeOneTable(table);
+		writer.writeTableScript(table);
 	}
 
 	@Test
@@ -87,7 +87,7 @@ public class OracleScriptWriterTest {
 		column.setRequired(true);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_ID NUMBER(5) NOT NULL\n" +
-				");\n", writer.writeOneTable(table));
+				");\n", writer.writeTableScript(table));
 	}
 
 	@Test
@@ -95,7 +95,7 @@ public class OracleScriptWriterTest {
 		addColumnToTable("testLabel", new Text(), 5);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_LABEL VARCHAR2(5)\n" +
-				");\n", writer.writeOneTable(table));
+				");\n", writer.writeTableScript(table));
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class OracleScriptWriterTest {
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_COLUMN_ID NUMBER(5),\n" +
 				"\tTEST_LABEL VARCHAR2(100)\n" +
-				");\n", writer.writeOneTable(table));
+				");\n", writer.writeTableScript(table));
 	}
 
 	@Test
@@ -117,7 +117,7 @@ public class OracleScriptWriterTest {
 						");\n" +
 						"\nCREATE UNIQUE INDEX TEST_TABLE_UK1 ON TEST_TABLE (TEST_COLUMN_ID);\n" +
 						"\nALTER TABLE TEST_TABLE ADD CONSTRAINT TEST_TABLE_PK PRIMARY KEY (TEST_COLUMN_ID) ENABLE;\n",
-				writer.writeOneTable(table));
+				writer.writeTableScript(table));
 	}
 
 	@Test
@@ -139,7 +139,7 @@ public class OracleScriptWriterTest {
 						"END;\n" +
 						"/\n" +
 						"ALTER TRIGGER TEST_TABLE_TRIG ENABLE;",
-				writer.writeOneTable(table));
+				writer.writeTableScript(table));
 	}
 
 	@Test
@@ -162,7 +162,7 @@ public class OracleScriptWriterTest {
 						"END;\n" +
 						"/\n" +
 						"ALTER TRIGGER TEST_TABLE_TRIG ENABLE;",
-				writer.writeOneTable(table));
+				writer.writeTableScript(table));
 	}
 
 	@Test
@@ -184,7 +184,7 @@ public class OracleScriptWriterTest {
 						"END;\n" +
 						"/\n" +
 						"ALTER TRIGGER TEST_TABLE_TRIG ENABLE;",
-				writer.writeOneTable(table));
+				writer.writeTableScript(table));
 	}
 
 	private Column addColumnToTable(String name, DataType type, int length) {
@@ -244,5 +244,28 @@ public class OracleScriptWriterTest {
 	@Test
 	public void cleanName_upperCaseReservedWords() {
 		Assert.assertEquals("GROUP_", writer.cleanName("group"));
+	}
+
+	@Test
+	public void writeSimpleData() {
+		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
+		Column label = addColumnToTable("label", new Text(), 15);
+		Row data = new Row(table);
+		data.add(id, 1);
+		data.add(label, "label1");
+		table.addRow(data);
+		Assert.assertEquals("INSERT INTO TEST_TABLE(ID, LABEL) VALUES (1, 'label1');\n",
+				writer.writeTableInsertions(table));
+	}
+
+	@Test
+	public void writeNullFieldData() {
+		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
+		addColumnToTable("label", new Text(), 15);
+		Row data = new Row(table);
+		data.add(id, 1);
+		table.addRow(data);
+		Assert.assertEquals("INSERT INTO TEST_TABLE(ID, LABEL) VALUES (1, NULL);\n",
+				writer.writeTableInsertions(table));
 	}
 }
