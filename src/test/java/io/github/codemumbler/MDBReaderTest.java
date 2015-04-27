@@ -232,6 +232,58 @@ public class MDBReaderTest {
 		Assert.assertEquals("1,label1,description1", rowDataToString(table.getRows().get(0)));
 	}
 
+	@Test
+	public void foreignKeysCount() {
+		setUpSimpleDatabase();
+		Assert.assertEquals(2, database.getTables().get(SIMPLE_VALUES_TABLE).getForeignKeys().size());
+	}
+
+	@Test
+	public void lookupForeignKeyParentTable() {
+		setUpSimpleDatabase();
+		Assert.assertEquals("SimpleTable", simpleValesForeignKeys(0).getParentTable().getName());
+	}
+
+	@Test
+	public void lookupForeignKeyParentColumn() {
+		setUpSimpleDatabase();
+		Assert.assertEquals("ID", simpleValesForeignKeys(0).getParentColumn().getName());
+	}
+
+	@Test
+	public void lookupForeignKeyChildColumn() {
+		setUpSimpleDatabase();
+		Assert.assertEquals("label lookup", simpleValesForeignKeys(0).getChildColumn().getName());
+	}
+
+	@Test
+	public void relationshipForeignKeyParentTable() {
+		setUpSimpleDatabase();
+		Assert.assertEquals("SimpleTable", simpleValesForeignKeys(1).getParentTable().getName());
+	}
+
+	@Test
+	public void relationshipForeignKeyParentColumn() {
+		setUpSimpleDatabase();
+		Assert.assertEquals("ID", simpleValesForeignKeys(1).getParentColumn().getName());
+	}
+
+	@Test
+	public void relationshipForeignKeyChildColumn() {
+		setUpSimpleDatabase();
+		Assert.assertEquals("foreign key", simpleValesForeignKeys(1).getChildColumn().getName());
+	}
+
+	@Test
+	public void foreignKeyOnNonPrimaryParentColumnDoesNotCreate() {
+		setUpMDBReader("badExamples.accdb");
+		Assert.assertEquals(0, database.getTable("notAGoodForeignKey").getForeignKeys().size());
+	}
+
+	private ForeignKey simpleValesForeignKeys(int index) {
+		return database.getTables().get(SIMPLE_VALUES_TABLE).getForeignKeys().get(index);
+	}
+
 	private String rowDataToString(Row row) {
 		String data = "";
 		for ( Column column : row.getColumns() ) {

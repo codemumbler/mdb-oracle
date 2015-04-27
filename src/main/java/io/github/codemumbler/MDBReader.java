@@ -3,12 +3,15 @@ package io.github.codemumbler;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.PropertyMap;
+import com.healthmarketscience.jackcess.Relationship;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MDBReader {
 
@@ -37,21 +40,59 @@ public class MDBReader {
 	public Database loadDatabase() {
 		try {
 			readTables();
+			buildForeignKeys();
 		} catch (SQLException | IOException ignored) {
 		}
 		return database;
 	}
 
+	private void buildForeignKeys() throws IOException {
+		for (String tableName : jackcessDatabase.getTableNames()) {
+			List<com.healthmarketscience.jackcess.Column> originalColumns = (List<com.healthmarketscience.jackcess.Column>)
+					jackcessDatabase.getTable(tableName).getColumns();
+			for (com.healthmarketscience.jackcess.Column column : originalColumns ) {
+				String lookupColumn = (String) readColumnProperty(column, "RowSourceType", "");
+				if ( lookupColumn.equals("Table/Query") ) {
+					ForeignKey foreignKey = new ForeignKey();
+					String columns = parseSQL(column, "SELECT (.*) FROM.*");
+					String parentTable = parseSQL(column, ".*FROM (.*?);");
+					columns = columns.replaceAll("\\[" + parentTable + "\\]", "");
+					columns = columns.replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\\.", "");
+					int boundColumn = (Short) readColumnProperty(column, "BoundColumn", 1);
+					foreignKey.setParentTable(database.getTable(parentTable));
+					foreignKey.setParentColumn(foreignKey.getParentTable().getColumn(columns.split(",")[boundColumn - 1]));
+					foreignKey.setChildColumn(database.getTable(tableName).getColumn(column.getName()));
+					database.getTable(tableName).addForeignKey(foreignKey);
+				}
+			}
+		}
+		for (Relationship relationship : jackcessDatabase.getRelationships()) {
+			ForeignKey foreignKey = new ForeignKey();
+			foreignKey.setParentTable(database.getTable(relationship.getFromTable().getName()));
+			foreignKey.setParentColumn(foreignKey.getParentTable().getColumn(relationship.getFromColumns().get(0).getName()));
+			foreignKey.setChildColumn(database.getTable(relationship.getToTable().getName()).getColumn(relationship.getToColumns().get(0).getName()));
+			if ( foreignKey.getParentColumn().isPrimary() )
+				database.getTable(relationship.getToTable().getName()).addForeignKey(foreignKey);
+		}
+	}
+
+	private String parseSQL(com.healthmarketscience.jackcess.Column column, String regex) throws IOException {
+		String sql = (String) readColumnProperty(column, "RowSource", "");
+		Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+		Matcher matcher = pattern.matcher(sql);
+		if ( matcher.find() )
+			return matcher.group(1);
+		return null;
+	}
+
 	private void readTables() throws IOException, SQLException {
-		List<Table> tables = new ArrayList<>(jackcessDatabase.getTableNames().size());
 		for (String tableName : jackcessDatabase.getTableNames()) {
 			Table table = new Table();
 			table.setName(tableName);
-			table.setColumns(readTableColumns(tableName));
+			table.addAllColumns(readTableColumns(tableName));
 			table.setRows(readTableData(table));
-			tables.add(table);
+			database.addTable(table);
 		}
-		database.setTables(tables);
 	}
 
 	private List<Row> readTableData(Table table) throws IOException {

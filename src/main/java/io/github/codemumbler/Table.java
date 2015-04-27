@@ -1,11 +1,14 @@
 package io.github.codemumbler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Table {
+
 	private String name;
-	private List<Column> columns;
+	private List<Column> columns = new ArrayList<>();
 	private List<Row> rows;
+	private List<ForeignKey> foreignKeys = new ArrayList<>();
 
 	public String getName() {
 		return name;
@@ -19,8 +22,8 @@ public class Table {
 		return columns;
 	}
 
-	public void setColumns(List<Column> columns) {
-		this.columns = columns;
+	public void addColumn(Column column) {
+		this.columns.add(column);
 	}
 
 	public List<Row> getRows() {
@@ -29,5 +32,25 @@ public class Table {
 
 	public void setRows(List<Row> rows) {
 		this.rows = rows;
+	}
+
+	public List<ForeignKey> getForeignKeys() {
+		return foreignKeys;
+	}
+
+	public void addForeignKey(ForeignKey foreignKey) {
+		foreignKeys.add(foreignKey);
+	}
+
+	public Column getColumn(String columnName) {
+		for ( Column column : columns ) {
+			if ( column.getName().equals(columnName) )
+				return column;
+		}
+		return null;
+	}
+
+	public void addAllColumns(List<Column> columns) {
+		this.columns.addAll(columns);
 	}
 }
