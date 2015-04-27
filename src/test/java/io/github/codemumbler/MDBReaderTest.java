@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -245,7 +246,8 @@ public class MDBReaderTest {
 		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 2);
 		Date actualDate = (Date) data.get(column);
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss z");
-		Assert.assertEquals("04/01/2015 00:00:00 EDT", simpleDateFormat.format(actualDate));
+		simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		Assert.assertEquals("04/01/2015 00:00:00 UTC", simpleDateFormat.format(actualDate));
 	}
 
 	@Test
