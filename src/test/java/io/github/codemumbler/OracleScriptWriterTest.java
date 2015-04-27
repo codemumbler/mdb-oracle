@@ -44,7 +44,7 @@ public class OracleScriptWriterTest {
 
 	@Test
 	public void memoDataType() {
-		addColumnToTable("testMemo", new Memo(), 0);
+		addColumnToTable("testMemo", new Memo(), -1);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_MEMO CLOB\n" +
 				");\n", writer.writeOneTable(table));
@@ -52,7 +52,7 @@ public class OracleScriptWriterTest {
 
 	@Test
 	public void doubleDataType() {
-		addColumnToTable("testDouble", new DoubleDataType(), 5, 2, false);
+		addColumnToTable("testDouble", new DoubleDataType(), 5, 2, false, false);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_DOUBLE NUMBER(5,2)\n" +
 				");\n", writer.writeOneTable(table));
@@ -68,7 +68,7 @@ public class OracleScriptWriterTest {
 
 	@Test
 	public void DateTimeType() {
-		addColumnToTable("testDateTime", new DateTime(), 1);
+		addColumnToTable("testDateTime", new DateTime(), -1);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_DATE_TIME TIMESTAMP\n" +
 				");\n", writer.writeOneTable(table));
@@ -76,13 +76,13 @@ public class OracleScriptWriterTest {
 
 	@Test(expected = OracleScriptWriterException.class)
 	public void unknownDataTypeThrowsException() {
-		addColumnToTable("testNull", new NullDataType(), 1);
+		addColumnToTable("testNull", new NullDataType(), -1);
 		writer.writeOneTable(table);
 	}
 
 	@Test
 	public void requiredColumn() {
-		addColumnToTable("testID", new IntegerDataType(), 5, -1, true);
+		addColumnToTable("testID", new IntegerDataType(), 5, -1, true, false);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_ID NUMBER(5) NOT NULL\n" +
 				");\n", writer.writeOneTable(table));
@@ -106,18 +106,30 @@ public class OracleScriptWriterTest {
 				");\n", writer.writeOneTable(table));
 	}
 
-	private void addColumnToTable(String name, DataType type, int length, int precision, boolean required) {
+	@Test
+	public void primaryColumn() {
+		addColumnToTable("testColumnID", new IntegerDataType(), 5, 0, true, true);
+		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
+				"\tTEST_COLUMN_ID NUMBER(5) NOT NULL\n" +
+				");\n" +
+				"\nCREATE UNIQUE INDEX TEST_TABLE_UK1 ON TEST_TABLE (TEST_COLUMN_ID);\n" +
+				"\nALTER TABLE TEST_TABLE ADD CONSTRAINT TEST_TABLE_PK PRIMARY KEY (TEST_COLUMN_ID) ENABLE;\n",
+				writer.writeOneTable(table));
+	}
+
+	private void addColumnToTable(String name, DataType type, int length, int precision, boolean required, boolean primary) {
 		Column column = new Column();
 		column.setName(name);
 		column.setDataType(type);
 		column.setLength(length);
 		column.setPrecision(precision);
 		column.setRequired(required);
+		column.setPrimary(primary);
 		table.addColumn(column);
 	}
 
 	private void addColumnToTable(String name, DataType type, int length) {
-		addColumnToTable(name, type, length, -1, false);
+		addColumnToTable(name, type, length, -1, false, false);
 	}
 
 	@Test

@@ -11,6 +11,9 @@ public class OracleScriptWriter {
 			"-- \tCREATE PROCEDURE,CREATE SYNONYM, CREATE SEQUENCE, CREATE TRIGGER TO %1$s;\n";
 	private static final List<String> RESERVED_WORDS = Arrays.asList("SQL", "GROUP", "LANGUAGE", "BY", "DECLARE",
 			"SELECT", "WHERE", "FROM");
+	private static final String UNIQUE = "\nCREATE UNIQUE INDEX %1$s_UK%3$d ON %1$s (%2$s);\n";
+	private static final String PRIMARY = "\nALTER TABLE %1$s ADD CONSTRAINT %1$s_PK PRIMARY KEY (%2$s) ENABLE;\n";
+
 	private final Database database;
 
 	public OracleScriptWriter(Database database) {
@@ -23,11 +26,15 @@ public class OracleScriptWriter {
 
 	public String writeOneTable(Table table) {
 		StringBuilder tableCreateScript = new StringBuilder("CREATE TABLE ");
-		tableCreateScript.append(cleanName(table.getName())).append(" (\n");
+		StringBuilder tableAlterationsScript = new StringBuilder();
+		int uniqueIndexNumber = 1;
+		String tableName = cleanName(table.getName());
+		tableCreateScript.append(tableName).append(" (\n");
 		if ( table.getColumns().isEmpty() )
 			throw new OracleScriptWriterException("Cannot write a table with no columns");
 		for ( Column column : table.getColumns() ) {
-			tableCreateScript.append("\t").append(cleanName(column.getName())).append(" ");
+			String columnName = cleanName(column.getName());
+			tableCreateScript.append("\t").append(columnName).append(" ");
 			tableCreateScript.append(column.getDataType().getOracleType());
 			if ( column.getDataType().hasLength() ) {
 				tableCreateScript.append("(").append(column.getLength());
@@ -39,10 +46,16 @@ public class OracleScriptWriter {
 				tableCreateScript.append(" NOT NULL");
 			}
 			tableCreateScript.append(",\n");
+
+			if ( column.isPrimary() ) {
+				tableAlterationsScript.append(String.format(UNIQUE, tableName, columnName, uniqueIndexNumber++));
+				tableAlterationsScript.append(String.format(PRIMARY, tableName, columnName));
+			}
 		}
 		tableCreateScript = tableCreateScript.deleteCharAt(tableCreateScript.length() - 2);
 
 		tableCreateScript.append(");\n");
+		tableCreateScript.append(tableAlterationsScript);
 		return tableCreateScript.toString();
 	}
 
