@@ -1,7 +1,5 @@
 package io.github.codemumbler;
 
-import java.lang.management.BufferPoolMXBean;
-
 public class ForeignKey {
 
 	private Table parentTable;

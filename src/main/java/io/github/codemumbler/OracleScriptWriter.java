@@ -9,9 +9,8 @@ public class OracleScriptWriter {
 	private static final String SCHEMA_CREATION = "--CREATE USER %1$s IDENTIFIED BY password2Change;\n" +
 			"-- GRANT CONNECT, RESOURCE, CREATE SESSION, CREATE TABLE, CREATE VIEW,\n" +
 			"-- \tCREATE PROCEDURE,CREATE SYNONYM, CREATE SEQUENCE, CREATE TRIGGER TO %1$s;\n";
-	private static final List<String> RESERVED_WORDS = Arrays.asList(new String[]{
-			"SQL", "GROUP", "LANGUAGE", "BY", "DECLARE", "SELECT", "WHERE", "FROM"
-	});
+	private static final List<String> RESERVED_WORDS = Arrays.asList("SQL", "GROUP", "LANGUAGE", "BY", "DECLARE",
+			"SELECT", "WHERE", "FROM");
 	private final Database database;
 
 	public OracleScriptWriter(Database database) {
@@ -19,9 +18,7 @@ public class OracleScriptWriter {
 	}
 
 	public String writeScript() {
-		StringBuilder script = new StringBuilder();
-		script.append(String.format(SCHEMA_CREATION, database.getSchemaName()));
-		return script.toString();
+		return String.format(SCHEMA_CREATION, database.getSchemaName());
 	}
 
 	public String writeOneTable(Table table) {
@@ -30,9 +27,12 @@ public class OracleScriptWriter {
 		if ( table.getColumns().isEmpty() )
 			throw new OracleScriptWriterException("Cannot write a table with no columns");
 		for ( Column column : table.getColumns() ) {
-			tableCreateScript.append("\t").append(cleanName(column.getName())).append(" NUMBER(").append(column.getLength()).append(")\n");
+			tableCreateScript.append("\t").append(cleanName(column.getName())).append(" ");
+			tableCreateScript.append(column.getDataType().getOracleType());
+
+			tableCreateScript.append("(").append(column.getLength()).append(")\n");
 		}
-		tableCreateScript.append(");");
+		tableCreateScript.append(");\n");
 		return tableCreateScript.toString();
 	}
 

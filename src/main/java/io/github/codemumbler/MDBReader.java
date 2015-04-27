@@ -4,6 +4,8 @@ import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Relationship;
+import io.github.codemumbler.datatype.DataType;
+import io.github.codemumbler.datatype.DataTypeFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,14 +17,7 @@ import java.util.regex.Pattern;
 
 public class MDBReader {
 
-	private static final int TEXT = 12;
-	private static final int LONG_INTEGER = 4;
-	private static final int MEMO = -1;
-	private static final int INTEGER = 5;
-	public static final int DATE_TIME = 93;
-	private static final int DOUBLE = 8;
-	private static final int BOOLEAN = 16;
-	public static final int DEFAULT_PRECISION = 5;
+	private static final int DEFAULT_PRECISION = 5;
 
 	private Database database;
 	private com.healthmarketscience.jackcess.Database jackcessDatabase;
@@ -82,7 +77,7 @@ public class MDBReader {
 		Matcher matcher = pattern.matcher(sql);
 		if ( matcher.find() )
 			return matcher.group(1);
-		return null;
+		return "";
 	}
 
 	private void readTables() throws IOException, SQLException {
@@ -129,11 +124,11 @@ public class MDBReader {
 			Column column = new Column();
 			column.setName(originalColumn.getName());
 			column.setDataType(readDataType(originalColumn));
-			column.setLength(readLength(originalColumn));
+			column.setLength(column.getDataType().getLength(originalColumn));
 			column.setPrimary(isPrimaryColumn(tableName, originalColumn));
 			column.setAutoIncrement(originalColumn.isAutoNumber());
 			column.setRequired(column.isPrimary() || (Boolean) readColumnProperty(originalColumn, "Required", false));
-			if ( column.getDataType() == DataType.DOUBLE )
+			if ( column.getDataType().hasPrecision() )
 				column.setPrecision(precision(originalColumn));
 			columns.add(column);
 		}
@@ -153,16 +148,6 @@ public class MDBReader {
 		if ( property != null )
 			return property.getValue();
 		return defaultValue;
-	}
-
-	private int readLength(com.healthmarketscience.jackcess.Column originalColumn) throws SQLException {
-		switch ( originalColumn.getSQLType() ) {
-			case DOUBLE:
-			case LONG_INTEGER:
-				return 9;
-			default:
-				return originalColumn.getLength();
-		}
 	}
 
 	private boolean isPrimaryColumn(String tableName, com.healthmarketscience.jackcess.Column originalColumn)
@@ -186,23 +171,7 @@ public class MDBReader {
 	}
 
 	private DataType readDataType(com.healthmarketscience.jackcess.Column originalColumn) throws SQLException {
-		switch ( originalColumn.getSQLType() ) {
-			case TEXT:
-				return DataType.TEXT;
-			case INTEGER:
-				return DataType.INTEGER;
-			case LONG_INTEGER:
-				return DataType.LONG;
-			case MEMO:
-				return DataType.MEMO;
-			case DATE_TIME:
-				return DataType.DATE_TIME;
-			case DOUBLE:
-				return DataType.DOUBLE;
-			case BOOLEAN:
-				return DataType.BOOLEAN;
-			default:
-				return null;
-		}
+		DataTypeFactory factory = new DataTypeFactory();
+		return factory.createDataType(originalColumn.getSQLType());
 	}
 }

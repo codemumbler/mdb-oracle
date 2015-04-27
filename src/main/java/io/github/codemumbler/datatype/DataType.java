@@ -1,0 +1,18 @@
+package io.github.codemumbler.datatype;
+
+import com.healthmarketscience.jackcess.Column;
+
+public abstract class DataType {
+
+	public int getLength(Column originalColumn) {
+		return originalColumn.getLength();
+	}
+
+	public boolean hasPrecision() {
+		return false;
+	}
+
+	public String getOracleType() {
+		return "NUMBER";
+	}
+}

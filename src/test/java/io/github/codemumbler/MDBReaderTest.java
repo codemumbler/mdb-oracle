@@ -1,5 +1,6 @@
 package io.github.codemumbler;
 
+import io.github.codemumbler.datatype.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -80,49 +81,49 @@ public class MDBReaderTest {
 	public void longIntegerDataType() {
 		setUpSimpleDatabase();
 		Column column = getTableColumn(ID_COLUMN);
-		Assert.assertEquals(DataType.LONG, column.getDataType());
+		Assert.assertEquals(LongDataType.class, column.getDataType().getClass());
 	}
 
 	@Test
 	public void textDataType() {
 		setUpSimpleDatabase();
 		Column column = getTableColumn(LABEL_COLUMN);
-		Assert.assertEquals(DataType.TEXT, column.getDataType());
+		Assert.assertEquals(Text.class, column.getDataType().getClass());
 	}
 
 	@Test
 	public void memoDataType() {
 		setUpSimpleDatabase();
 		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 1);
-		Assert.assertEquals(DataType.MEMO, column.getDataType());
+		Assert.assertEquals(Memo.class, column.getDataType().getClass());
 	}
 
 	@Test
 	public void integerDataType() {
 		setUpSimpleDatabase();
 		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 6);
-		Assert.assertEquals(DataType.INTEGER, column.getDataType());
+		Assert.assertEquals(IntegerDataType.class, column.getDataType().getClass());
 	}
 
 	@Test
 	public void dateTimeDataType() {
 		setUpSimpleDatabase();
 		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 2);
-		Assert.assertEquals(DataType.DATE_TIME, column.getDataType());
+		Assert.assertEquals(DateTime.class, column.getDataType().getClass());
 	}
 
 	@Test
 	public void doubleDataType() {
 		setUpSimpleDatabase();
 		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 7);
-		Assert.assertEquals(DataType.DOUBLE, column.getDataType());
+		Assert.assertEquals(DoubleDataType.class, column.getDataType().getClass());
 	}
 
 	@Test
 	public void booleanDataType() {
 		setUpSimpleDatabase();
 		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 4);
-		Assert.assertEquals(DataType.BOOLEAN, column.getDataType());
+		Assert.assertEquals(BooleanDataType.class, column.getDataType().getClass());
 	}
 
 	@Test

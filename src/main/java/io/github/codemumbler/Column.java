@@ -1,5 +1,7 @@
 package io.github.codemumbler;
 
+import io.github.codemumbler.datatype.DataType;
+
 public class Column {
 
 	private String name;
