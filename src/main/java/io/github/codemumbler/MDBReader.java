@@ -57,6 +57,7 @@ public class MDBReader {
 					foreignKey.setParentTable(database.getTable(parentTable));
 					foreignKey.setParentColumn(foreignKey.getParentTable().getColumn(columns.split(",")[boundColumn - 1]));
 					foreignKey.setChildColumn(database.getTable(tableName).getColumn(column.getName()));
+					foreignKey.getChildColumn().setForeignKey(true);
 					database.getTable(tableName).addForeignKey(foreignKey);
 				}
 			}
@@ -66,8 +67,10 @@ public class MDBReader {
 			foreignKey.setParentTable(database.getTable(relationship.getFromTable().getName()));
 			foreignKey.setParentColumn(foreignKey.getParentTable().getColumn(relationship.getFromColumns().get(0).getName()));
 			foreignKey.setChildColumn(database.getTable(relationship.getToTable().getName()).getColumn(relationship.getToColumns().get(0).getName()));
-			if ( foreignKey.getParentColumn().isPrimary() )
+			if ( foreignKey.getParentColumn().isPrimary() ) {
+				foreignKey.getChildColumn().setForeignKey(true);
 				database.getTable(relationship.getToTable().getName()).addForeignKey(foreignKey);
+			}
 		}
 	}
 

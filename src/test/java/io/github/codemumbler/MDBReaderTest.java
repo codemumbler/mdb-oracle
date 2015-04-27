@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 public class MDBReaderTest {
@@ -234,6 +235,16 @@ public class MDBReaderTest {
 	}
 
 	@Test
+	public void readDateValue() {
+		setUpMDBReader(SIMPLE_DATABASE_FILE);
+		table = database.getTables().get(SIMPLE_VALUES_TABLE);
+		Row data = table.getRows().get(0);
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 2);
+		Date date = (Date) data.get(column);
+		Assert.assertEquals(1427860800000L, date.getTime());
+	}
+
+	@Test
 	public void foreignKeysCount() {
 		setUpSimpleDatabase();
 		Assert.assertEquals(2, database.getTables().get(SIMPLE_VALUES_TABLE).getForeignKeys().size());
@@ -258,6 +269,12 @@ public class MDBReaderTest {
 	}
 
 	@Test
+	public void lookupChildColumnMarkedAsForeignKey() {
+		setUpSimpleDatabase();
+		Assert.assertTrue(simpleValesForeignKeys(0).getChildColumn().isForeignKey());
+	}
+
+	@Test
 	public void relationshipForeignKeyParentTable() {
 		setUpSimpleDatabase();
 		Assert.assertEquals("SimpleTable", simpleValesForeignKeys(1).getParentTable().getName());
@@ -273,6 +290,12 @@ public class MDBReaderTest {
 	public void relationshipForeignKeyChildColumn() {
 		setUpSimpleDatabase();
 		Assert.assertEquals("foreign key", simpleValesForeignKeys(1).getChildColumn().getName());
+	}
+
+	@Test
+	public void childColumnMarkedAsForeignKey() {
+		setUpSimpleDatabase();
+		Assert.assertTrue(simpleValesForeignKeys(1).getChildColumn().isForeignKey());
 	}
 
 	@Test

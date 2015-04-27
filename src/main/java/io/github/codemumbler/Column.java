@@ -11,6 +11,7 @@ public class Column {
 	private boolean autoIncrement;
 	private int precision;
 	private boolean required;
+	private boolean foreignKey;
 
 	public String getName() {
 		return name;
@@ -66,5 +67,13 @@ public class Column {
 
 	public void setRequired(boolean required) {
 		this.required = required;
+	}
+
+	public boolean isForeignKey() {
+		return foreignKey;
+	}
+
+	public void setForeignKey(boolean foreignKey) {
+		this.foreignKey = foreignKey;
 	}
 }
