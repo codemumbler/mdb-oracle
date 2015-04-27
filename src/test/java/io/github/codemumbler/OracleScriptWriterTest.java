@@ -62,20 +62,25 @@ public class OracleScriptWriterTest {
 				");\n", writer.writeOneTable(table));
 	}
 
-//	@Test
-//	public void oneTableTwoColumns() {
-//		Table table = new Table();
-//		table.setName("testTable");
-//		Column column = new Column();
-//		column.setName("testColumnID");
-//		column.setDataType(DataType.INTEGER);
-//		column.setLength(5);
-//		table.addColumn(column);
-//		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
-//				"\tTEST_COLUMN_ID NUMBER(5),\n" +
-//				"\tTEST_LABEL VARCHAR2(100),\n" +
-//				");\n", writer.writeOneTable(table));
-//	}
+	@Test
+	public void oneTableTwoColumns() {
+		Table table = new Table();
+		table.setName("testTable");
+		Column column = new Column();
+		column.setName("testColumnID");
+		column.setDataType(new IntegerDataType());
+		column.setLength(5);
+		table.addColumn(column);
+		column = new Column();
+		column.setName("testLabel");
+		column.setDataType(new Text());
+		column.setLength(100);
+		table.addColumn(column);
+		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
+				"\tTEST_COLUMN_ID NUMBER(5),\n" +
+				"\tTEST_LABEL VARCHAR2(100)\n" +
+				");\n", writer.writeOneTable(table));
+	}
 
 	@Test
 	public void cleanName_alreadyUpperCase() {
