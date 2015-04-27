@@ -16,4 +16,14 @@ public class OracleScriptWriter {
 		script.append(String.format(SCHEMA_CREATION, database.getSchemaName()));
 		return script.toString();
 	}
+
+	public String writeOneTable(Table table) {
+		StringBuilder tableCreateScript = new StringBuilder("CREATE TABLE ");
+		tableCreateScript.append(table.getName()).append(" (\n");
+		for ( Column column : table.getColumns() ) {
+			tableCreateScript.append("\t").append(column.getName()).append(" NUMBER(").append(column.getLength()).append(")\n");
+		}
+		tableCreateScript.append(");");
+		return tableCreateScript.toString();
+	}
 }
