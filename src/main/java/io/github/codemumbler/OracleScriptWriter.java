@@ -113,8 +113,12 @@ public class OracleScriptWriter {
 	public String writeTableInsertions(Table table) {
 		String tableName = cleanName(table.getName());
 		String columns = tableColumnsToString(table);
-		String values = rowValues(table.getRows().get(0));
-		return String.format(INSERTION, tableName, columns, values);
+		StringBuilder insertions = new StringBuilder();
+		for ( Row row : table.getRows() ) {
+			String values = rowValues(row);
+			insertions.append(String.format(INSERTION, tableName, columns, values));
+		}
+		return insertions.toString();
 	}
 
 	private String rowValues(Row row) {

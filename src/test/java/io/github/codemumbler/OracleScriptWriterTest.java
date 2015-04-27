@@ -268,4 +268,21 @@ public class OracleScriptWriterTest {
 		Assert.assertEquals("INSERT INTO TEST_TABLE(ID, LABEL) VALUES (1, NULL);\n",
 				writer.writeTableInsertions(table));
 	}
+
+	@Test
+	public void multipleInsertions() {
+		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
+		Column label = addColumnToTable("label", new Text(), 15);
+		Row data = new Row(table);
+		data.add(id, 1);
+		data.add(label, "label1");
+		table.addRow(data);
+		data = new Row(table);
+		data.add(id, 2);
+		data.add(label, "label2");
+		table.addRow(data);
+		Assert.assertEquals("INSERT INTO TEST_TABLE(ID, LABEL) VALUES (1, 'label1');\n" +
+						"INSERT INTO TEST_TABLE(ID, LABEL) VALUES (2, 'label2');\n",
+				writer.writeTableInsertions(table));
+	}
 }
