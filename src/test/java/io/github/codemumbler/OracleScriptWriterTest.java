@@ -330,4 +330,13 @@ public class OracleScriptWriterTest {
 						"INSERT INTO TEST_TABLE(ID, LABEL) VALUES (2, 'label2');\n",
 				writer.writeTableInsertions(table));
 	}
+
+	@Test(expected = OracleScriptWriterException.class)
+	public void tableWithUnknownDataType() {
+		Column nullable = addColumnToTable("Nullable", new NullDataType(), -1);
+		Row data = new Row(table);
+		data.add(nullable, 1);
+		table.addRow(data);
+		writer.writeTableInsertions(table);
+	}
 }

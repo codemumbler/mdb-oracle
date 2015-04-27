@@ -18,9 +18,7 @@ public abstract class DataType {
 
 	public abstract String getOracleType();
 
-	public String writeValue(Object value) {
-		return "NULL";
-	}
+	public abstract String writeValue(Object value);
 
 	public boolean isInsertable() {
 		return true;
