@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -242,18 +243,9 @@ public class MDBReaderTest {
 		table = database.getTables().get(SIMPLE_VALUES_TABLE);
 		Row data = table.getRows().get(0);
 		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 2);
-		Calendar actual = Calendar.getInstance(TimeZone.getTimeZone("EST"));
-		actual.setTime((Date) data.get(column));
-		Calendar expected = Calendar.getInstance(TimeZone.getTimeZone("EST"));
-		expected.set(Calendar.MONTH, 2);
-		expected.set(Calendar.DAY_OF_MONTH, 31);
-		expected.set(Calendar.YEAR, 2015);
-		expected.set(Calendar.HOUR, 11);
-		expected.set(Calendar.MINUTE, 0);
-		expected.set(Calendar.SECOND, 0);
-		expected.set(Calendar.MILLISECOND, 0);
-		expected.set(Calendar.ZONE_OFFSET, actual.get(Calendar.ZONE_OFFSET));
-		Assert.assertEquals(expected.getTimeInMillis(), actual.getTimeInMillis());
+		Date actualDate = (Date) data.get(column);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss z");
+		Assert.assertEquals("04/01/2015 00:00:00 EDT", simpleDateFormat.format(actualDate));
 	}
 
 	@Test
