@@ -67,6 +67,14 @@ public class OracleScriptWriterTest {
 	}
 
 	@Test
+	public void DateTimeType() {
+		addColumnToTable("testDateTime", new DateTime(), 1);
+		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
+				"\tTEST_DATE_TIME TIMESTAMP\n" +
+				");\n", writer.writeOneTable(table));
+	}
+
+	@Test
 	public void requiredColumn() {
 		addColumnToTable("testID", new IntegerDataType(), 5, -1, true);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
