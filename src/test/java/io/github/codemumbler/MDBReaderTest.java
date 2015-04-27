@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 public class MDBReaderTest {
 
@@ -241,17 +242,18 @@ public class MDBReaderTest {
 		table = database.getTables().get(SIMPLE_VALUES_TABLE);
 		Row data = table.getRows().get(0);
 		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 2);
-		Date date = (Date) data.get(column);
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(Calendar.MONTH, 3);
-		calendar.set(Calendar.DAY_OF_MONTH, 1);
-		calendar.set(Calendar.YEAR, 2015);
-		calendar.set(Calendar.HOUR, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		calendar.set(Calendar.ZONE_OFFSET, 25200000);
-		Assert.assertEquals(calendar.getTimeInMillis(), date.getTime());
+		Calendar actual = Calendar.getInstance(TimeZone.getTimeZone("EST"));
+		actual.setTime((Date) data.get(column));
+		Calendar expected = Calendar.getInstance(TimeZone.getTimeZone("EST"));
+		expected.set(Calendar.MONTH, 2);
+		expected.set(Calendar.DAY_OF_MONTH, 31);
+		expected.set(Calendar.YEAR, 2015);
+		expected.set(Calendar.HOUR, 11);
+		expected.set(Calendar.MINUTE, 0);
+		expected.set(Calendar.SECOND, 0);
+		expected.set(Calendar.MILLISECOND, 0);
+		expected.set(Calendar.ZONE_OFFSET, actual.get(Calendar.ZONE_OFFSET));
+		Assert.assertEquals(expected.getTimeInMillis(), actual.getTimeInMillis());
 	}
 
 	@Test
