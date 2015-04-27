@@ -245,9 +245,8 @@ public class MDBReaderTest {
 		Row data = table.getRows().get(0);
 		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 2);
 		Date actualDate = (Date) data.get(column);
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss z");
-		simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-		Assert.assertEquals("04/01/2015 00:00:00 UTC", simpleDateFormat.format(actualDate));
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+		Assert.assertEquals("04/01/2015", simpleDateFormat.format(actualDate));
 	}
 
 	@Test
