@@ -6,4 +6,9 @@ public class BooleanDataType extends DataType {
 	public String getOracleType() {
 		return "VARCHAR2";
 	}
+
+	@Override
+	public String writeValue(Object value) {
+		return ((Boolean) value ? "'Y'" : "'N'");
+	}
 }

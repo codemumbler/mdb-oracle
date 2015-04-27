@@ -8,6 +8,8 @@ public class Text extends DataType {
 	}
 
 	public String writeValue(Object value) {
-		return "'" + value + "'";
+		String strValue = (String) value;
+		strValue = strValue.replaceAll("'", "''");
+		return "'" + strValue + "'";
 	}
 }
