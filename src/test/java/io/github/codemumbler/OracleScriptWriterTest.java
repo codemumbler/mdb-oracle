@@ -1,9 +1,6 @@
 package io.github.codemumbler;
 
-import io.github.codemumbler.datatype.DoubleDataType;
-import io.github.codemumbler.datatype.IntegerDataType;
-import io.github.codemumbler.datatype.Memo;
-import io.github.codemumbler.datatype.Text;
+import io.github.codemumbler.datatype.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,12 +9,15 @@ public class OracleScriptWriterTest {
 
 	private Database database;
 	private OracleScriptWriter writer;
+	private Table table;
 
 	@Before
 	public void setUp() {
 		database = new Database();
 		writer = new OracleScriptWriter(database);
 		database.setSchemaName("TEST_SCHEMA");
+		table = new Table();
+		table.setName("testTable");
 	}
 
 	@Test
@@ -31,20 +31,12 @@ public class OracleScriptWriterTest {
 
 	@Test(expected = OracleScriptWriterException.class)
 	public void tableWithNoColumns() {
-		Table table = new Table();
-		table.setName("testTable");
 		writer.writeOneTable(table);
 	}
 
 	@Test
 	public void oneTableColumns() {
-		Table table = new Table();
-		table.setName("testTable");
-		Column column = new Column();
-		column.setName("testColumnID");
-		column.setDataType(new IntegerDataType());
-		column.setLength(5);
-		table.addColumn(column);
+		addColumnToTable("testColumnID", new IntegerDataType(), 5);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_COLUMN_ID NUMBER(5)\n" +
 				");\n", writer.writeOneTable(table));
@@ -52,12 +44,7 @@ public class OracleScriptWriterTest {
 
 	@Test
 	public void memoDataType() {
-		Table table = new Table();
-		table.setName("testTable");
-		Column column = new Column();
-		column.setName("testMemo");
-		column.setDataType(new Memo());
-		table.addColumn(column);
+		addColumnToTable("testMemo", new Memo(), 0);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_MEMO CLOB\n" +
 				");\n", writer.writeOneTable(table));
@@ -65,29 +52,23 @@ public class OracleScriptWriterTest {
 
 	@Test
 	public void doubleDataType() {
-		Table table = new Table();
-		table.setName("testTable");
-		Column column = new Column();
-		column.setName("testDouble");
-		column.setDataType(new DoubleDataType());
-		column.setLength(5);
-		column.setPrecision(2);
-		table.addColumn(column);
+		addColumnToTable("testDouble", new DoubleDataType(), 5, 2, false);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_DOUBLE NUMBER(5,2)\n" +
 				");\n", writer.writeOneTable(table));
 	}
 
 	@Test
+	public void booleanDataType() {
+		addColumnToTable("testBoolean", new BooleanDataType(), 1);
+		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
+				"\tTEST_BOOLEAN VARCHAR2(1)\n" +
+				");\n", writer.writeOneTable(table));
+	}
+
+	@Test
 	public void requiredColumn() {
-		Table table = new Table();
-		table.setName("testTable");
-		Column column = new Column();
-		column.setName("testID");
-		column.setDataType(new IntegerDataType());
-		column.setLength(5);
-		column.setRequired(true);
-		table.addColumn(column);
+		addColumnToTable("testID", new IntegerDataType(), 5, -1, true);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_ID NUMBER(5) NOT NULL\n" +
 				");\n", writer.writeOneTable(table));
@@ -95,13 +76,7 @@ public class OracleScriptWriterTest {
 
 	@Test
 	public void oneTableTextColumn() {
-		Table table = new Table();
-		table.setName("testTable");
-		Column column = new Column();
-		column.setName("testLabel");
-		column.setDataType(new Text());
-		column.setLength(5);
-		table.addColumn(column);
+		addColumnToTable("testLabel", new Text(), 5);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_LABEL VARCHAR2(5)\n" +
 				");\n", writer.writeOneTable(table));
@@ -109,22 +84,26 @@ public class OracleScriptWriterTest {
 
 	@Test
 	public void oneTableTwoColumns() {
-		Table table = new Table();
-		table.setName("testTable");
-		Column column = new Column();
-		column.setName("testColumnID");
-		column.setDataType(new IntegerDataType());
-		column.setLength(5);
-		table.addColumn(column);
-		column = new Column();
-		column.setName("testLabel");
-		column.setDataType(new Text());
-		column.setLength(100);
-		table.addColumn(column);
+		addColumnToTable("testColumnID", new IntegerDataType(), 5);
+		addColumnToTable("testLabel", new Text(), 100);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_COLUMN_ID NUMBER(5),\n" +
 				"\tTEST_LABEL VARCHAR2(100)\n" +
 				");\n", writer.writeOneTable(table));
+	}
+
+	private void addColumnToTable(String name, DataType type, int length, int precision, boolean required) {
+		Column column = new Column();
+		column.setName(name);
+		column.setDataType(type);
+		column.setLength(length);
+		column.setPrecision(precision);
+		column.setRequired(required);
+		table.addColumn(column);
+	}
+
+	private void addColumnToTable(String name, DataType type, int length) {
+		addColumnToTable(name, type, length, -1, false);
 	}
 
 	@Test
