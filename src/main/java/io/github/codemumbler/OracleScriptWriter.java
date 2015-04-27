@@ -26,9 +26,11 @@ public class OracleScriptWriter {
 
 	public String writeOneTable(Table table) {
 		StringBuilder tableCreateScript = new StringBuilder("CREATE TABLE ");
-		tableCreateScript.append(table.getName()).append(" (\n");
+		tableCreateScript.append(cleanName(table.getName())).append(" (\n");
+		if ( table.getColumns().isEmpty() )
+			throw new OracleScriptWriterException("Cannot write a table with no columns");
 		for ( Column column : table.getColumns() ) {
-			tableCreateScript.append("\t").append(column.getName()).append(" NUMBER(").append(column.getLength()).append(")\n");
+			tableCreateScript.append("\t").append(cleanName(column.getName())).append(" NUMBER(").append(column.getLength()).append(")\n");
 		}
 		tableCreateScript.append(");");
 		return tableCreateScript.toString();

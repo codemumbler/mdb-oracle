@@ -28,12 +28,19 @@ public class OracleScriptWriterTest {
 				writer.writeScript());
 	}
 
+	@Test(expected = OracleScriptWriterException.class)
+	public void tableWithNoColumns() {
+		Table table = new Table();
+		table.setName("testTable");
+		writer.writeOneTable(table);
+	}
+
 	@Test
 	public void oneTableColumns() {
 		Table table = new Table();
-		table.setName("TEST_TABLE");
+		table.setName("testTable");
 		Column column = new Column();
-		column.setName("TEST_COLUMN_ID");
+		column.setName("testColumnID");
 		column.setDataType(DataType.INTEGER);
 		column.setLength(5);
 		table.addColumn(column);
