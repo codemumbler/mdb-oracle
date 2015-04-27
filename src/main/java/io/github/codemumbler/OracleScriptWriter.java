@@ -29,7 +29,14 @@ public class OracleScriptWriter {
 		for ( Column column : table.getColumns() ) {
 			tableCreateScript.append("\t").append(cleanName(column.getName())).append(" ");
 			tableCreateScript.append(column.getDataType().getOracleType());
-			tableCreateScript.append("(").append(column.getLength()).append("),\n");
+			if ( column.getDataType().hasLength() ) {
+				tableCreateScript.append("(").append(column.getLength());
+				if ( column.getDataType().hasPrecision() )
+					tableCreateScript.append(",").append(column.getPrecision());
+				tableCreateScript.append(")");
+
+			}
+			tableCreateScript.append(",\n");
 		}
 		tableCreateScript = tableCreateScript.deleteCharAt(tableCreateScript.length() - 2);
 

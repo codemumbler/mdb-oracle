@@ -1,6 +1,8 @@
 package io.github.codemumbler;
 
+import io.github.codemumbler.datatype.DoubleDataType;
 import io.github.codemumbler.datatype.IntegerDataType;
+import io.github.codemumbler.datatype.Memo;
 import io.github.codemumbler.datatype.Text;
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,6 +47,34 @@ public class OracleScriptWriterTest {
 		table.addColumn(column);
 		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_COLUMN_ID NUMBER(5)\n" +
+				");\n", writer.writeOneTable(table));
+	}
+
+	@Test
+	public void memoDataType() {
+		Table table = new Table();
+		table.setName("testTable");
+		Column column = new Column();
+		column.setName("testMemo");
+		column.setDataType(new Memo());
+		table.addColumn(column);
+		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
+				"\tTEST_MEMO CLOB\n" +
+				");\n", writer.writeOneTable(table));
+	}
+
+	@Test
+	public void doubleDataType() {
+		Table table = new Table();
+		table.setName("testTable");
+		Column column = new Column();
+		column.setName("testDouble");
+		column.setDataType(new DoubleDataType());
+		column.setLength(5);
+		column.setPrecision(2);
+		table.addColumn(column);
+		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
+				"\tTEST_DOUBLE NUMBER(5,2)\n" +
 				");\n", writer.writeOneTable(table));
 	}
 

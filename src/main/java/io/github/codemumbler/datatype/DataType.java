@@ -8,6 +8,10 @@ public abstract class DataType {
 		return originalColumn.getLength();
 	}
 
+	public boolean hasLength() {
+		return true;
+	}
+
 	public boolean hasPrecision() {
 		return false;
 	}
