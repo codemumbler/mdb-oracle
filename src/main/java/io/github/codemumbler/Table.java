@@ -62,4 +62,15 @@ public class Table {
 	public void addRow(Row row) {
 		rows.add(row);
 	}
+
+	public Column getPrimaryColumn() {
+		for ( Column column : getColumns() )
+			if ( column.isPrimary() )
+				return column;
+		return null;
+	}
+
+	public boolean hasPrimaryKey() {
+		return getPrimaryColumn() != null;
+	}
 }

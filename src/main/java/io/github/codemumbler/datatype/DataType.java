@@ -21,4 +21,8 @@ public abstract class DataType {
 	public String writeValue(Object value) {
 		return "NULL";
 	}
+
+	public boolean isInsertable() {
+		return true;
+	}
 }

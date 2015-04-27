@@ -7,9 +7,10 @@ public class Text extends DataType {
 		return "VARCHAR2";
 	}
 
+	@Override
 	public String writeValue(Object value) {
 		String strValue = (String) value;
-		strValue = strValue.replaceAll("'", "''");
+		strValue = strValue.replaceAll("'", "''").replaceAll("\r\n", "' || chr(13) || chr(10) ||'");
 		return "'" + strValue + "'";
 	}
 }

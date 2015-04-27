@@ -24,4 +24,12 @@ public class Row {
 	public void add(Column column, Object value) {
 		valueMap.put(column, value);
 	}
+
+	public String getTableName() {
+		return table.getName();
+	}
+
+	public Object getPrimaryKeyValue() {
+		return get(table.getPrimaryColumn());
+	}
 }

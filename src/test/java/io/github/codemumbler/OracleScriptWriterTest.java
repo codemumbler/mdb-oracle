@@ -18,6 +18,7 @@ public class OracleScriptWriterTest {
 		database.setSchemaName("TEST_SCHEMA");
 		table = new Table();
 		table.setName("testTable");
+		database.addTable(table);
 	}
 
 	@Test
@@ -266,6 +267,50 @@ public class OracleScriptWriterTest {
 		data.add(id, 1);
 		table.addRow(data);
 		Assert.assertEquals("INSERT INTO TEST_TABLE(ID, LABEL) VALUES (1, NULL);\n",
+				writer.writeTableInsertions(table));
+	}
+
+	@Test
+	public void writeClobFieldData() {
+		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
+		id.setPrimary(true);
+		Column clob = addColumnToTable("MEMO", new Memo(), -1);
+		Row data = new Row(table);
+		data.add(id, 1);
+		data.add(clob, "Some really long text");
+		table.addRow(data);
+		Assert.assertEquals("INSERT INTO TEST_TABLE(ID) VALUES (1);\n" +
+						"DECLARE\nstr varchar2(32767);\nBEGIN\n\tstr := 'Some really long text';\n" +
+						"UPDATE TEST_TABLE SET MEMO = str WHERE ID = 1;\nEND;\n/\n",
+				writer.writeTableInsertions(table));
+	}
+
+	@Test
+	public void nullClobFieldData() {
+		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
+		id.setPrimary(true);
+		Column clob = addColumnToTable("MEMO", new Memo(), -1);
+		Row data = new Row(table);
+		data.add(id, 1);
+		data.add(clob, null);
+		table.addRow(data);
+		Assert.assertEquals("INSERT INTO TEST_TABLE(ID) VALUES (1);\n",
+				writer.writeTableInsertions(table));
+	}
+
+	@Test
+	public void noPrimaryKeyClobFieldDataUsesAllColumns() {
+		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
+		Column label = addColumnToTable("LABEL", new Text(), 100);
+		Column clob = addColumnToTable("MEMO", new Memo(), -1);
+		Row data = new Row(table);
+		data.add(id, 1);
+		data.add(label, "label1");
+		data.add(clob, "Memo for row 1");
+		table.addRow(data);
+		Assert.assertEquals("INSERT INTO TEST_TABLE(ID, LABEL) VALUES (1, 'label1');\n" +
+						"DECLARE\nstr varchar2(32767);\nBEGIN\n\tstr := 'Memo for row 1';\n" +
+						"UPDATE TEST_TABLE SET MEMO = str WHERE ID = 1 AND LABEL = 'label1';\nEND;\n/\n",
 				writer.writeTableInsertions(table));
 	}
 

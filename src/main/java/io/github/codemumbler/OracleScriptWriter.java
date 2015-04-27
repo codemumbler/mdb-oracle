@@ -26,6 +26,8 @@ public class OracleScriptWriter {
 			"/\n" +
 			"ALTER TRIGGER %1$s_TRIG ENABLE;";
 	private static final String INSERTION = "INSERT INTO %s(%s) VALUES (%s);\n";
+	private static final String CLOB_INSERTION = "DECLARE\nstr varchar2(32767);\nBEGIN\n\tstr := %s;\n" +
+			"UPDATE %s SET %s = str WHERE %s;\nEND;\n/\n";
 
 	private final Database database;
 
@@ -117,13 +119,47 @@ public class OracleScriptWriter {
 		for ( Row row : table.getRows() ) {
 			String values = rowValues(row);
 			insertions.append(String.format(INSERTION, tableName, columns, values));
+			insertions.append(additionalUpdates(row));
 		}
 		return insertions.toString();
+	}
+
+	private String additionalUpdates(Row row) {
+		StringBuilder builder = new StringBuilder();
+
+		for ( Column column : row.getColumns() ) {
+			if ( column.getDataType().isInsertable() || row.get(column) == null )
+				continue;
+			Table table = database.getTable(row.getTableName());
+			builder.append(String.format(CLOB_INSERTION,
+					column.getDataType().writeValue(row.get(column)),
+					cleanName(row.getTableName()),
+					cleanName(column.getName()),
+					buildSetWhereClause(table, row)
+			));
+		}
+		return builder.toString();
+	}
+
+	private String buildSetWhereClause(Table table, Row row) {
+		if ( table.hasPrimaryKey() )
+			return cleanName(table.getPrimaryColumn().getName()) + " = " +
+					table.getPrimaryColumn().getDataType().writeValue(row.getPrimaryKeyValue());
+		StringBuilder whereClause = new StringBuilder();
+		for ( Column column : row.getColumns() ) {
+			if ( column.getDataType().isInsertable() )
+				whereClause.append(cleanName(column.getName())).append(" = ").append(
+						column.getDataType().writeValue(row.get(column))).append(" AND ");
+		}
+		whereClause.delete(whereClause.length() - 5, whereClause.length());
+		return whereClause.toString();
 	}
 
 	private String rowValues(Row row) {
 		StringBuilder builder = new StringBuilder();
 		for ( Column column : row.getColumns() ) {
+			if ( !column.getDataType().isInsertable() )
+				continue;
 			if ( row.get(column) == null )
 				builder.append("NULL");
 			else
@@ -137,6 +173,7 @@ public class OracleScriptWriter {
 	private String tableColumnsToString(Table table) {
 		StringBuilder builder = new StringBuilder();
 		for ( Column column : table.getColumns() ) {
+			if ( column.getDataType().isInsertable() )
 			builder.append(cleanName(column.getName())).append(", ");
 		}
 		builder.delete(builder.length() - 2, builder.length());

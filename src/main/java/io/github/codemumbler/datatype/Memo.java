@@ -1,6 +1,6 @@
 package io.github.codemumbler.datatype;
 
-public class Memo extends DataType {
+public class Memo extends Text {
 
 	@Override
 	public String getOracleType() {
@@ -9,6 +9,11 @@ public class Memo extends DataType {
 
 	@Override
 	public boolean hasLength() {
+		return false;
+	}
+
+	@Override
+	public boolean isInsertable() {
 		return false;
 	}
 }
