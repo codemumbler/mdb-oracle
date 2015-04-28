@@ -1,2 +1,2 @@
 # mdb-oracle
-Converts MDB files in Oracle SQL scripts.
+Converts MS Access files into Oracle SQL scripts.
