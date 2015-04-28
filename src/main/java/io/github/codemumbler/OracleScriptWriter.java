@@ -207,12 +207,20 @@ public class OracleScriptWriter {
 		return builder.toString();
 	}
 
-	public String writeDDLScript(Database database) {
+	public String writeDDLScript() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(writeSchemaScript());
 		for ( Table table : database.getTables() ) {
 			builder.append(writeTableScript(table));
 			builder.append(writeForeignKey(table));
+		}
+		return builder.toString();
+	}
+
+	public String writeDatabaseInsertions() {
+		StringBuilder builder = new StringBuilder();
+		for ( Table table : database.getTables() ) {
+			builder.append(writeTableInsertions(table));
 		}
 		return builder.toString();
 	}

@@ -439,27 +439,7 @@ public class OracleScriptWriterTest {
 
 	@Test
 	public void writeFullDDLScript() {
-		Table parentTable = table;
-		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
-		id.setPrimary(true);
-		Row data = new Row(table);
-		data.add(id, 1);
-		table.addRow(data);
-		Table childTable = new Table();
-		childTable.setName("CHILD_TABLE");
-		database.addTable(childTable);
-		table = childTable;
-		Column childColumn = addColumnToTable("FOREIGN_ID", new IntegerDataType(), 5);
-		data = new Row(table);
-		data.add(childColumn, 2);
-		table.addRow(data);
-		childColumn.setRequired(true);
-		childColumn.setForeignKey(true);
-		ForeignKey foreignKey = new ForeignKey();
-		foreignKey.setChildColumn(childColumn);
-		foreignKey.setParentTable(parentTable);
-		foreignKey.setParentColumn(id);
-		childTable.addForeignKey(foreignKey);
+		createDatabase();
 		Assert.assertEquals("--CREATE USER TEST_SCHEMA IDENTIFIED BY password2Change;\n" +
 				"-- GRANT CONNECT, RESOURCE, CREATE SESSION, CREATE TABLE, CREATE VIEW,\n" +
 				"-- \tCREATE PROCEDURE,CREATE SYNONYM, CREATE SEQUENCE, CREATE TRIGGER TO TEST_SCHEMA;\n" +
@@ -475,8 +455,40 @@ public class OracleScriptWriterTest {
 				");\n" +
 				"\n" +
 				"ALTER TABLE CHILD_TABLE ADD CONSTRAINT CHILD_TABLE_FK1 FOREIGN KEY (FOREIGN_ID)\n" +
-				"\tREFERENCES TEST_TABLE (ID) ENABLE;\n", writer.writeDDLScript(database));
+				"\tREFERENCES TEST_TABLE (ID) ENABLE;\n", writer.writeDDLScript());
 	}
+
+	@Test
+	public void writeFullInsertionScript() {
+		createDatabase();
+		Assert.assertEquals("INSERT INTO TEST_TABLE(ID) VALUES (1);\n" +
+				"INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES (1);\n", writer.writeDatabaseInsertions());
+	}
+
+	private void createDatabase() {
+		Table parentTable = table;
+		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
+		id.setPrimary(true);
+		Row data = new Row(table);
+		data.add(id, 1);
+		table.addRow(data);
+		Table childTable = new Table();
+		childTable.setName("CHILD_TABLE");
+		database.addTable(childTable);
+		table = childTable;
+		Column childColumn = addColumnToTable("FOREIGN_ID", new IntegerDataType(), 5);
+		data = new Row(table);
+		data.add(childColumn, 1);
+		table.addRow(data);
+		childColumn.setRequired(true);
+		childColumn.setForeignKey(true);
+		ForeignKey foreignKey = new ForeignKey();
+		foreignKey.setChildColumn(childColumn);
+		foreignKey.setParentTable(parentTable);
+		foreignKey.setParentColumn(id);
+		childTable.addForeignKey(foreignKey);
+	}
+
 
 	private Column addColumnToTable(String name, DataType type, int length) {
 		Column column = new Column();
