@@ -46,6 +46,7 @@ public class OracleScriptWriter {
 	public String writeTableScript(Table table) {
 		StringBuilder tableCreateScript = new StringBuilder("CREATE TABLE ");
 		StringBuilder tableAlterationsScript = new StringBuilder();
+		StringBuilder primaryColumns = new StringBuilder();
 		int uniqueIndexNumber = 1;
 		String tableName = cleanName(table.getName());
 		tableCreateScript.append(tableName).append(" (\n");
@@ -67,14 +68,18 @@ public class OracleScriptWriter {
 			tableCreateScript.append(",\n");
 
 			if ( column.isPrimary() ) {
-				tableAlterationsScript.append(String.format(UNIQUE, tableName, columnName, uniqueIndexNumber++));
-				tableAlterationsScript.append(String.format(PRIMARY, tableName, columnName));
+				primaryColumns.append(columnName).append(", ");
 			}
 			if ( column.isAutoIncrement() ) {
 				String maxSequenceValue = new String(new char[column.getLength()]).replace("\0", "9");
 				tableAlterationsScript.append(String.format(SEQUENCE, tableName, maxSequenceValue, table.getNextValue()));
 				tableAlterationsScript.append(String.format(TRIGGER, tableName, columnName));
 			}
+		}
+		if ( !primaryColumns.toString().isEmpty() ) {
+			primaryColumns.delete(primaryColumns.length() - 2, primaryColumns.length());
+			tableAlterationsScript.append(String.format(UNIQUE, tableName, primaryColumns, uniqueIndexNumber++));
+			tableAlterationsScript.append(String.format(PRIMARY, tableName, primaryColumns));
 		}
 		tableCreateScript = tableCreateScript.deleteCharAt(tableCreateScript.length() - 2);
 

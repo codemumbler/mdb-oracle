@@ -488,6 +488,23 @@ public class OracleScriptWriterTest {
 				"\tREFERENCES TEST_TABLE (ID) ENABLE;\n", writer.writeScript());
 	}
 
+	@Test
+	public void multiplePrimaryColumns() {
+		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
+		id.setPrimary(true);
+		Column id2 = addColumnToTable("ID2", new IntegerDataType(), 5);
+		id2.setPrimary(true);
+		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
+				"\tID NUMBER(5),\n" +
+				"\tID2 NUMBER(5)\n" +
+				");\n" +
+				"\n" +
+				"CREATE UNIQUE INDEX TEST_TABLE_UK1 ON TEST_TABLE (ID, ID2);\n" +
+				"\n" +
+				"ALTER TABLE TEST_TABLE ADD CONSTRAINT TEST_TABLE_PK PRIMARY KEY (ID, ID2) ENABLE;\n",
+				writer.writeTableScript(table));
+	}
+
 	private void createDatabase() {
 		Table parentTable = table;
 		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
