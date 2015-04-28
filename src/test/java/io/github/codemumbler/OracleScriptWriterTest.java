@@ -27,7 +27,7 @@ public class OracleScriptWriterTest {
 		Assert.assertEquals("--CREATE USER EmptySchema IDENTIFIED BY password2Change;\n" +
 						"-- GRANT CONNECT, RESOURCE, CREATE SESSION, CREATE TABLE, CREATE VIEW,\n" +
 						"-- \tCREATE PROCEDURE,CREATE SYNONYM, CREATE SEQUENCE, CREATE TRIGGER TO EmptySchema;\n",
-				writer.writeScript());
+				writer.writeSchemaScript());
 	}
 
 	@Test(expected = OracleScriptWriterException.class)
@@ -435,6 +435,47 @@ public class OracleScriptWriterTest {
 		foreignKey.setParentColumn(id);
 		childTable.addForeignKey(foreignKey);
 		Assert.assertEquals("--INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES ('AB');\n", writer.writeTableInsertions(childTable));
+	}
+
+	@Test
+	public void writeFullDDLScript() {
+		Table parentTable = table;
+		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
+		id.setPrimary(true);
+		Row data = new Row(table);
+		data.add(id, 1);
+		table.addRow(data);
+		Table childTable = new Table();
+		childTable.setName("CHILD_TABLE");
+		database.addTable(childTable);
+		table = childTable;
+		Column childColumn = addColumnToTable("FOREIGN_ID", new IntegerDataType(), 5);
+		data = new Row(table);
+		data.add(childColumn, 2);
+		table.addRow(data);
+		childColumn.setRequired(true);
+		childColumn.setForeignKey(true);
+		ForeignKey foreignKey = new ForeignKey();
+		foreignKey.setChildColumn(childColumn);
+		foreignKey.setParentTable(parentTable);
+		foreignKey.setParentColumn(id);
+		childTable.addForeignKey(foreignKey);
+		Assert.assertEquals("--CREATE USER TEST_SCHEMA IDENTIFIED BY password2Change;\n" +
+				"-- GRANT CONNECT, RESOURCE, CREATE SESSION, CREATE TABLE, CREATE VIEW,\n" +
+				"-- \tCREATE PROCEDURE,CREATE SYNONYM, CREATE SEQUENCE, CREATE TRIGGER TO TEST_SCHEMA;\n" +
+				"CREATE TABLE TEST_TABLE (\n" +
+				"\tID NUMBER(5)\n" +
+				");\n" +
+				"\n" +
+				"CREATE UNIQUE INDEX TEST_TABLE_UK1 ON TEST_TABLE (ID);\n" +
+				"\n" +
+				"ALTER TABLE TEST_TABLE ADD CONSTRAINT TEST_TABLE_PK PRIMARY KEY (ID) ENABLE;\n" +
+				"CREATE TABLE CHILD_TABLE (\n" +
+				"\tFOREIGN_ID NUMBER(5) NOT NULL\n" +
+				");\n" +
+				"\n" +
+				"ALTER TABLE CHILD_TABLE ADD CONSTRAINT CHILD_TABLE_FK1 FOREIGN KEY (FOREIGN_ID)\n" +
+				"\tREFERENCES TEST_TABLE (ID) ENABLE;\n", writer.writeDDLScript(database));
 	}
 
 	private Column addColumnToTable(String name, DataType type, int length) {

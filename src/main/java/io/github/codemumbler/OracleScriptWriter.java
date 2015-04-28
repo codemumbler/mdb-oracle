@@ -39,7 +39,7 @@ public class OracleScriptWriter {
 		this.database = database;
 	}
 
-	public String writeScript() {
+	public String writeSchemaScript() {
 		return String.format(SCHEMA_CREATION, database.getSchemaName());
 	}
 
@@ -203,6 +203,16 @@ public class OracleScriptWriter {
 					cleanName(foreignKey.getChildColumn().getName()),
 					cleanName(foreignKey.getParentTable().getName()),
 					cleanName(foreignKey.getParentColumn().getName())));
+		}
+		return builder.toString();
+	}
+
+	public String writeDDLScript(Database database) {
+		StringBuilder builder = new StringBuilder();
+		builder.append(writeSchemaScript());
+		for ( Table table : database.getTables() ) {
+			builder.append(writeTableScript(table));
+			builder.append(writeForeignKey(table));
 		}
 		return builder.toString();
 	}
