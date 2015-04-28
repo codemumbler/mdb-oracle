@@ -197,15 +197,6 @@ public class OracleScriptWriterTest {
 				writer.writeTableScript(table));
 	}
 
-	private Column addColumnToTable(String name, DataType type, int length) {
-		Column column = new Column();
-		column.setName(name);
-		column.setDataType(type);
-		column.setLength(length);
-		table.addColumn(column);
-		return column;
-	}
-
 	@Test
 	public void cleanName_alreadyUpperCase() {
 		Assert.assertEquals("TABLE1", writer.cleanName("TABLE1"));
@@ -347,5 +338,39 @@ public class OracleScriptWriterTest {
 		data.add(nullable, 1);
 		table.addRow(data);
 		writer.writeTableInsertions(table);
+	}
+
+	@Test
+	public void writeForeignKeys() {
+		Table parentTable = table;
+		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
+		id.setPrimary(true);
+		Column label = addColumnToTable("label", new Text(), 15);
+		Row data = new Row(table);
+		data.add(id, 1);
+		data.add(label, "label1");
+		table.addRow(data);
+		Table childTable = new Table();
+		childTable.setName("CHILD_TABLE");
+		database.addTable(childTable);
+		table = childTable;
+		Column childColumn = addColumnToTable("FOREIGN_ID", new IntegerDataType(), 5);
+		childColumn.setForeignKey(true);
+		ForeignKey foreignKey = new ForeignKey();
+		foreignKey.setChildColumn(childColumn);
+		foreignKey.setParentTable(parentTable);
+		foreignKey.setParentColumn(id);
+		childTable.addForeignKey(foreignKey);
+		Assert.assertEquals("\nALTER TABLE CHILD_TABLE ADD CONSTRAINT CHILD_TABLE_FK1 FOREIGN KEY (FOREIGN_ID)\n" +
+				"\tREFERENCES TEST_TABLE (ID) ENABLE;\n", writer.writeForeignKey(childTable));
+	}
+
+	private Column addColumnToTable(String name, DataType type, int length) {
+		Column column = new Column();
+		column.setName(name);
+		column.setDataType(type);
+		column.setLength(length);
+		table.addColumn(column);
+		return column;
 	}
 }

@@ -28,6 +28,8 @@ public class OracleScriptWriter {
 	private static final String INSERTION = "INSERT INTO %s(%s) VALUES (%s);\n";
 	private static final String CLOB_INSERTION = "DECLARE\nstr varchar2(32767);\nBEGIN\n\tstr := %s;\n" +
 			"UPDATE %s SET %s = str WHERE %s;\nEND;\n/\n";
+	private static final String FOREIGN_KEY = "\nALTER TABLE %1$s ADD CONSTRAINT %1$s_FK%2$d FOREIGN KEY (%3$s)\n" +
+			"\tREFERENCES %4$s (%5$s) ENABLE;\n";
 
 	private final Database database;
 
@@ -177,6 +179,20 @@ public class OracleScriptWriter {
 			builder.append(cleanName(column.getName())).append(", ");
 		}
 		builder.delete(builder.length() - 2, builder.length());
+		return builder.toString();
+	}
+
+	public String writeForeignKey(Table table) {
+		StringBuilder builder = new StringBuilder();
+		int foreignKeyIndex = 1;
+		for ( ForeignKey foreignKey : table.getForeignKeys() ) {
+			builder.append(String.format(FOREIGN_KEY,
+					cleanName(table.getName()),
+					foreignKeyIndex++,
+					cleanName(foreignKey.getChildColumn().getName()),
+					cleanName(foreignKey.getParentTable().getName()),
+					cleanName(foreignKey.getParentColumn().getName())));
+		}
 		return builder.toString();
 	}
 }
