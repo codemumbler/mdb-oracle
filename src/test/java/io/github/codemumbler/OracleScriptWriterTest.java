@@ -465,6 +465,29 @@ public class OracleScriptWriterTest {
 				"INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES (1);\n", writer.writeDatabaseInsertions());
 	}
 
+	@Test
+	public void writeFullScript() {
+		createDatabase();
+		Assert.assertEquals("--CREATE USER TEST_SCHEMA IDENTIFIED BY password2Change;\n" +
+				"-- GRANT CONNECT, RESOURCE, CREATE SESSION, CREATE TABLE, CREATE VIEW,\n" +
+				"-- \tCREATE PROCEDURE,CREATE SYNONYM, CREATE SEQUENCE, CREATE TRIGGER TO TEST_SCHEMA;\n" +
+				"CREATE TABLE TEST_TABLE (\n" +
+				"\tID NUMBER(5)\n" +
+				");\n" +
+				"\n" +
+				"CREATE UNIQUE INDEX TEST_TABLE_UK1 ON TEST_TABLE (ID);\n" +
+				"\n" +
+				"ALTER TABLE TEST_TABLE ADD CONSTRAINT TEST_TABLE_PK PRIMARY KEY (ID) ENABLE;\n" +
+				"CREATE TABLE CHILD_TABLE (\n" +
+				"\tFOREIGN_ID NUMBER(5) NOT NULL\n" +
+				");\n" +
+				"INSERT INTO TEST_TABLE(ID) VALUES (1);\n" +
+				"INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES (1);\n" +
+				"\n" +
+				"ALTER TABLE CHILD_TABLE ADD CONSTRAINT CHILD_TABLE_FK1 FOREIGN KEY (FOREIGN_ID)\n" +
+				"\tREFERENCES TEST_TABLE (ID) ENABLE;\n", writer.writeScript());
+	}
+
 	private void createDatabase() {
 		Table parentTable = table;
 		Column id = addColumnToTable("ID", new IntegerDataType(), 5);

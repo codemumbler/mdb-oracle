@@ -224,4 +224,19 @@ public class OracleScriptWriter {
 		}
 		return builder.toString();
 	}
+
+	public String writeScript() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(writeSchemaScript());
+		for ( Table table : database.getTables() ) {
+			builder.append(writeTableScript(table));
+		}
+		for ( Table table : database.getTables() ) {
+			builder.append(writeTableInsertions(table));
+		}
+		for ( Table table : database.getTables() ) {
+			builder.append(writeForeignKey(table));
+		}
+		return builder.toString();
+	}
 }
