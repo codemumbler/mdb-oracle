@@ -6,6 +6,7 @@ import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Relationship;
 import io.github.codemumbler.datatype.DataType;
 import io.github.codemumbler.datatype.DataTypeFactory;
+import io.github.codemumbler.datatype.PrecisionDataType;
 
 import java.io.File;
 import java.io.IOException;
@@ -134,16 +135,16 @@ public class MDBReader {
 			column.setAutoIncrement(originalColumn.isAutoNumber());
 			column.setRequired(column.isPrimary() || (Boolean) readColumnProperty(originalColumn, "Required", false));
 			if ( column.getDataType().hasPrecision() )
-				column.setPrecision(precision(originalColumn));
+				column.setPrecision(precision(originalColumn, (PrecisionDataType) column.getDataType()));
 			columns.add(column);
 		}
 		return columns;
 	}
 
-	private int precision(com.healthmarketscience.jackcess.Column originalColumn) throws IOException {
-		int precision = (Byte) readColumnProperty(originalColumn, "DecimalPlaces", DEFAULT_PRECISION);
+	private int precision(com.healthmarketscience.jackcess.Column originalColumn, PrecisionDataType dataType) throws IOException {
+		int precision = (Byte) readColumnProperty(originalColumn, "DecimalPlaces", dataType.getDefaultPrecision());
 		if (precision <= 0)
-			precision = DEFAULT_PRECISION;
+			precision = dataType.getDefaultPrecision();
 		return precision;
 	}
 

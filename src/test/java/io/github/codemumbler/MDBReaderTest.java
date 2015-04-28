@@ -6,20 +6,18 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Time;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 public class MDBReaderTest {
 
 	private static final String SIMPLE_DATABASE_FILE = "simple.accdb";
-	private static final int SIMPLE_TABLE = 0;
-	private static final int ID_COLUMN = 0;
-	private static final int LABEL_COLUMN = 1;
-	private static final int SIMPLE_VALUES_TABLE = 1;
+	private static final String SIMPLE_TABLE = "SimpleTable";
+	private static final String ID_COLUMN = "ID";
+	private static final String LABEL_COLUMN = "label";
+	private static final String SIMPLE_VALUES_TABLE = "SimpleValueTable";
 
 	private MDBReader reader;
 	private Database database;
@@ -65,11 +63,6 @@ public class MDBReaderTest {
 		Assert.assertEquals("SimpleTable", table.getName());
 	}
 
-	private void setUpSimpleDatabase() {
-		setUpMDBReader(SIMPLE_DATABASE_FILE);
-		table = database.getTables().get(SIMPLE_TABLE);
-	}
-
 	@Test
 	public void columnCount() {
 		setUpSimpleDatabase();
@@ -99,49 +92,56 @@ public class MDBReaderTest {
 	@Test
 	public void memoDataType() {
 		setUpSimpleDatabase();
-		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 1);
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, "memo");
 		Assert.assertEquals(Memo.class, column.getDataType().getClass());
 	}
 
 	@Test
 	public void integerDataType() {
 		setUpSimpleDatabase();
-		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 6);
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, "number");
 		Assert.assertEquals(IntegerDataType.class, column.getDataType().getClass());
 	}
 
 	@Test
 	public void dateTimeDataType() {
 		setUpSimpleDatabase();
-		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 2);
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, "date time");
 		Assert.assertEquals(DateTime.class, column.getDataType().getClass());
 	}
 
 	@Test
 	public void doubleDataType() {
 		setUpSimpleDatabase();
-		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 7);
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, "precision number");
 		Assert.assertEquals(DoubleDataType.class, column.getDataType().getClass());
 	}
 
 	@Test
 	public void booleanDataType() {
 		setUpSimpleDatabase();
-		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 4);
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, "yes no");
 		Assert.assertEquals(BooleanDataType.class, column.getDataType().getClass());
+	}
+
+	@Test
+	public void currencyDataType() {
+		setUpSimpleDatabase();
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, "currency");
+		Assert.assertEquals(CurrencyDataType.class, column.getDataType().getClass());
 	}
 
 	@Test
 	public void booleanLength() {
 		setUpSimpleDatabase();
-		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 4);
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, "yes no");
 		Assert.assertEquals(1, column.getLength());
 	}
 
 	@Test
 	public void precision() {
 		setUpSimpleDatabase();
-		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 7);
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, "precision number");
 		Assert.assertEquals(4, column.getPrecision());
 	}
 
@@ -160,14 +160,14 @@ public class MDBReaderTest {
 	@Test
 	public void autoPrecision() {
 		setUpMDBReader("badExamples.accdb");
-		Column column = getTableColumn(0, 2);
+		Column column = getTableColumn("noPrimaryKey", "bad Precision");
 		Assert.assertEquals(5, column.getPrecision());
 	}
 
 	@Test
 	public void memoLength() {
 		setUpSimpleDatabase();
-		Assert.assertEquals(0, getTableColumn(SIMPLE_VALUES_TABLE, 1).getLength());
+		Assert.assertEquals(0, getTableColumn(SIMPLE_VALUES_TABLE, "memo").getLength());
 	}
 
 	@Test
@@ -202,7 +202,7 @@ public class MDBReaderTest {
 	public void autoIncrementingColumnMadeIntoPrimaryWhenNonExists() {
 		setUpMDBReader("badExamples.accdb");
 		table = database.getTables().get(0);
-		Column column = getTableColumn(0, 0);
+		Column column = getTableColumn("noPrimaryKey", "ID");
 		Assert.assertTrue(column.isPrimary());
 	}
 
@@ -240,19 +240,27 @@ public class MDBReaderTest {
 
 	@Test
 	public void readDateValue() {
-		setUpMDBReader(SIMPLE_DATABASE_FILE);
-		table = database.getTables().get(SIMPLE_VALUES_TABLE);
+		setUpSimpleDatabase();
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, "date time");
 		Row data = table.getRows().get(0);
-		Column column = getTableColumn(SIMPLE_VALUES_TABLE, 2);
 		Date actualDate = (Date) data.get(column);
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
 		Assert.assertEquals("04/01/2015", simpleDateFormat.format(actualDate));
 	}
 
 	@Test
+	public void readCurrencyValue() {
+		setUpSimpleDatabase();
+		Column column = getTableColumn(SIMPLE_VALUES_TABLE, "currency");
+		Row data = table.getRows().get(0);
+		BigDecimal currency = (BigDecimal) data.get(column);
+		Assert.assertEquals(3.50D, currency.doubleValue(), 0.001d);
+	}
+
+	@Test
 	public void foreignKeysCount() {
 		setUpSimpleDatabase();
-		Assert.assertEquals(2, database.getTables().get(SIMPLE_VALUES_TABLE).getForeignKeys().size());
+		Assert.assertEquals(2, database.getTable(SIMPLE_VALUES_TABLE).getForeignKeys().size());
 	}
 
 	@Test
@@ -316,7 +324,7 @@ public class MDBReaderTest {
 	}
 
 	private ForeignKey simpleValesForeignKeys(int index) {
-		return database.getTables().get(SIMPLE_VALUES_TABLE).getForeignKeys().get(index);
+		return database.getTable(SIMPLE_VALUES_TABLE).getForeignKeys().get(index);
 	}
 
 	private String rowDataToString(Row row) {
@@ -327,12 +335,13 @@ public class MDBReaderTest {
 		return data.substring(0, data.length() - 1);
 	}
 
-	private Column getTableColumn(int columnIndex) {
-		return database.getTables().get(SIMPLE_TABLE).getColumns().get(columnIndex);
+	private Column getTableColumn(String columnName) {
+		return database.getTable(SIMPLE_TABLE).getColumn(columnName);
 	}
 
-	private Column getTableColumn(int tableIndex, int columnIndex) {
-		return database.getTables().get(tableIndex).getColumns().get(columnIndex);
+	private Column getTableColumn(String tableName, String columnName) {
+		table = database.getTable(tableName);
+		return table.getColumn(columnName);
 	}
 
 	private String columnToString(List<Column> columns) {
@@ -351,5 +360,10 @@ public class MDBReaderTest {
 			e.printStackTrace();
 			Assert.fail("Failed to initialized access database");
 		}
+	}
+
+	private void setUpSimpleDatabase() {
+		setUpMDBReader(SIMPLE_DATABASE_FILE);
+		table = database.getTable(SIMPLE_TABLE);
 	}
 }

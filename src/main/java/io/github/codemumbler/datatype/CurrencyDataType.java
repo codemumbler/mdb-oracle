@@ -1,6 +1,6 @@
 package io.github.codemumbler.datatype;
 
-public class DoubleDataType extends PrecisionDataType {
+public class CurrencyDataType extends PrecisionDataType {
 
 	@Override
 	public boolean hasPrecision() {
@@ -9,6 +9,6 @@ public class DoubleDataType extends PrecisionDataType {
 
 	@Override
 	public int getDefaultPrecision() {
-		return 5;
+		return 2;
 	}
 }

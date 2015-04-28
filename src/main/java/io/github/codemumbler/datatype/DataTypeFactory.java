@@ -9,6 +9,7 @@ public class DataTypeFactory {
 	private static final int DATE_TIME = 93;
 	private static final int DOUBLE = 8;
 	private static final int BOOLEAN = 16;
+	private static final int CURRENCY = 3;
 
 	public DataType createDataType(int sqlType) {
 		switch ( sqlType ) {
@@ -26,6 +27,8 @@ public class DataTypeFactory {
 				return new DoubleDataType();
 			case BOOLEAN:
 				return new BooleanDataType();
+			case CURRENCY:
+				return new CurrencyDataType();
 			default:
 				return new NullDataType();
 		}

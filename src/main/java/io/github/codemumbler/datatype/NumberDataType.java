@@ -7,6 +7,7 @@ public class NumberDataType extends DataType {
 		return "NUMBER";
 	}
 
+	@Override
 	public String writeValue(Object value) {
 		return value.toString();
 	}
