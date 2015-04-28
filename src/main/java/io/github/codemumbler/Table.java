@@ -1,7 +1,11 @@
 package io.github.codemumbler;
 
+import io.github.codemumbler.datatype.NumberDataType;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Table {
 
@@ -10,6 +14,7 @@ public class Table {
 	private List<Row> rows = new ArrayList<>();
 	private List<ForeignKey> foreignKeys = new ArrayList<>();
 	private long nextValue;
+	private Map<Column, String> indexedValues = new HashMap<>();
 
 	public String getName() {
 		return name;
@@ -72,5 +77,29 @@ public class Table {
 
 	public boolean hasPrimaryKey() {
 		return getPrimaryColumn() != null;
+	}
+
+	public boolean parentTablesHaveForeignKeyValue(Row row) {
+		for ( Column column : row.getColumns() ) {
+			if ( column.isForeignKey() ) {
+				for ( ForeignKey foreignKey : foreignKeys ) {
+					if ( foreignKey.getChildColumn().equals(column) && foreignKey.getParentTable().keyExists(foreignKey.getParentColumn(), row.get(column)) ) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean keyExists(Column parentColumn, Object value) {
+		if ( indexedValues.get(parentColumn) == null ) {
+			StringBuilder values = new StringBuilder(" 0,");
+			for (Row row : getRows()) {
+				values.append(" ").append(row.get(parentColumn)).append(",");
+			}
+			indexedValues.put(parentColumn, values.toString());
+		}
+		return indexedValues.get(parentColumn).contains(" " + value + ",");
 	}
 }

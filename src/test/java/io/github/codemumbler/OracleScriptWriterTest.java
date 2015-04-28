@@ -345,11 +345,6 @@ public class OracleScriptWriterTest {
 		Table parentTable = table;
 		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
 		id.setPrimary(true);
-		Column label = addColumnToTable("label", new Text(), 15);
-		Row data = new Row(table);
-		data.add(id, 1);
-		data.add(label, "label1");
-		table.addRow(data);
 		Table childTable = new Table();
 		childTable.setName("CHILD_TABLE");
 		database.addTable(childTable);
@@ -363,6 +358,83 @@ public class OracleScriptWriterTest {
 		childTable.addForeignKey(foreignKey);
 		Assert.assertEquals("\nALTER TABLE CHILD_TABLE ADD CONSTRAINT CHILD_TABLE_FK1 FOREIGN KEY (FOREIGN_ID)\n" +
 				"\tREFERENCES TEST_TABLE (ID) ENABLE;\n", writer.writeForeignKey(childTable));
+	}
+
+	@Test
+	public void notRequiredForeignKeyConvertFromAccessZeroToOracleNull() {
+		Table parentTable = table;
+		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
+		id.setPrimary(true);
+		Row data = new Row(table);
+		data.add(id, 1);
+		table.addRow(data);
+		Table childTable = new Table();
+		childTable.setName("CHILD_TABLE");
+		database.addTable(childTable);
+		table = childTable;
+		Column childColumn = addColumnToTable("FOREIGN_ID", new IntegerDataType(), 5);
+		data = new Row(table);
+		data.add(childColumn, 0);
+		table.addRow(data);
+		childColumn.setForeignKey(true);
+		ForeignKey foreignKey = new ForeignKey();
+		foreignKey.setChildColumn(childColumn);
+		foreignKey.setParentTable(parentTable);
+		foreignKey.setParentColumn(id);
+		childTable.addForeignKey(foreignKey);
+		Assert.assertEquals("INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES (NULL);\n", writer.writeTableInsertions(childTable));
+	}
+
+	@Test
+	public void notFoundForeignKeyValueWritesCommentedOutInsert() {
+		Table parentTable = table;
+		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
+		id.setPrimary(true);
+		Row data = new Row(table);
+		data.add(id, 1);
+		table.addRow(data);
+		Table childTable = new Table();
+		childTable.setName("CHILD_TABLE");
+		database.addTable(childTable);
+		table = childTable;
+		Column childColumn = addColumnToTable("FOREIGN_ID", new IntegerDataType(), 5);
+		data = new Row(table);
+		data.add(childColumn, 2);
+		table.addRow(data);
+		childColumn.setRequired(true);
+		childColumn.setForeignKey(true);
+		ForeignKey foreignKey = new ForeignKey();
+		foreignKey.setChildColumn(childColumn);
+		foreignKey.setParentTable(parentTable);
+		foreignKey.setParentColumn(id);
+		childTable.addForeignKey(foreignKey);
+		Assert.assertEquals("--INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES (2);\n", writer.writeTableInsertions(childTable));
+	}
+
+	@Test
+	public void textNotFoundForeignKeyValueWritesCommentedOutInsert() {
+		Table parentTable = table;
+		Column id = addColumnToTable("PROV", new Text(), 5);
+		id.setPrimary(true);
+		Row data = new Row(table);
+		data.add(id, "ON");
+		table.addRow(data);
+		Table childTable = new Table();
+		childTable.setName("CHILD_TABLE");
+		database.addTable(childTable);
+		table = childTable;
+		Column childColumn = addColumnToTable("FOREIGN_ID", new Text(), 5);
+		data = new Row(table);
+		data.add(childColumn, "AB");
+		table.addRow(data);
+		childColumn.setRequired(true);
+		childColumn.setForeignKey(true);
+		ForeignKey foreignKey = new ForeignKey();
+		foreignKey.setChildColumn(childColumn);
+		foreignKey.setParentTable(parentTable);
+		foreignKey.setParentColumn(id);
+		childTable.addForeignKey(foreignKey);
+		Assert.assertEquals("--INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES ('AB');\n", writer.writeTableInsertions(childTable));
 	}
 
 	private Column addColumnToTable(String name, DataType type, int length) {

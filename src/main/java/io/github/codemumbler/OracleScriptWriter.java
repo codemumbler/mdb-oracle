@@ -1,5 +1,7 @@
 package io.github.codemumbler;
 
+import io.github.codemumbler.datatype.NumberDataType;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -119,6 +121,8 @@ public class OracleScriptWriter {
 		String columns = tableColumnsToString(table);
 		StringBuilder insertions = new StringBuilder();
 		for ( Row row : table.getRows() ) {
+			if ( !table.getForeignKeys().isEmpty() && !table.parentTablesHaveForeignKeyValue(row) )
+				insertions.append("--");
 			String values = rowValues(row);
 			insertions.append(String.format(INSERTION, tableName, columns, values));
 			insertions.append(additionalUpdates(row));
@@ -162,7 +166,8 @@ public class OracleScriptWriter {
 		for ( Column column : row.getColumns() ) {
 			if ( !column.getDataType().isInsertable() )
 				continue;
-			if ( row.get(column) == null )
+			Object value = row.get(column);
+			if ( value == null || isNullForeignKey(column, value))
 				builder.append("NULL");
 			else
 				builder.append(column.getDataType().writeValue(row.get(column)));
@@ -170,6 +175,12 @@ public class OracleScriptWriter {
 		}
 		builder.delete(builder.length() - 2, builder.length());
 		return builder.toString();
+	}
+
+	private boolean isNullForeignKey(Column column, Object value) {
+		if ( !(column.getDataType() instanceof NumberDataType) )
+			return false;
+		return !column.isRequired() && column.isForeignKey() && value.equals(0);
 	}
 
 	private String tableColumnsToString(Table table) {
