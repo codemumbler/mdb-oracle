@@ -100,6 +100,15 @@ public class OracleScriptWriterTest {
 	}
 
 	@Test
+	public void currencyColumn() {
+		Column column = addColumnToTable("testMoney", new CurrencyDataType(), 5);
+		column.setPrecision(2);
+		Assert.assertEquals("CREATE TABLE TEST_TABLE (\n" +
+				"\tTEST_MONEY NUMBER(5,2)\n" +
+				");\n", writer.writeTableScript(table));
+	}
+
+	@Test
 	public void oneTableTwoColumns() {
 		addColumnToTable("testColumnID", new IntegerDataType(), 5);
 		addColumnToTable("testLabel", new Text(), 100);
