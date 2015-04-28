@@ -183,9 +183,7 @@ public class OracleScriptWriter {
 	}
 
 	private boolean isNullForeignKey(Column column, Object value) {
-		if ( !(column.getDataType() instanceof NumberDataType) )
-			return false;
-		return !column.isRequired() && column.isForeignKey() && value.equals(0);
+		return column.getDataType() instanceof NumberDataType && !column.isRequired() && column.isForeignKey() && value.equals(0);
 	}
 
 	private String tableColumnsToString(Table table) {

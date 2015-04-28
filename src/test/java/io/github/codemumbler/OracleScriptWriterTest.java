@@ -351,11 +351,7 @@ public class OracleScriptWriterTest {
 		table = childTable;
 		Column childColumn = addColumnToTable("FOREIGN_ID", new IntegerDataType(), 5);
 		childColumn.setForeignKey(true);
-		ForeignKey foreignKey = new ForeignKey();
-		foreignKey.setChildColumn(childColumn);
-		foreignKey.setParentTable(parentTable);
-		foreignKey.setParentColumn(id);
-		childTable.addForeignKey(foreignKey);
+		addForeignKeyToTable(parentTable, id, childColumn);
 		Assert.assertEquals("\nALTER TABLE CHILD_TABLE ADD CONSTRAINT CHILD_TABLE_FK1 FOREIGN KEY (FOREIGN_ID)\n" +
 				"\tREFERENCES TEST_TABLE (ID) ENABLE;\n", writer.writeForeignKey(childTable));
 	}
@@ -377,11 +373,7 @@ public class OracleScriptWriterTest {
 		data.add(childColumn, 0);
 		table.addRow(data);
 		childColumn.setForeignKey(true);
-		ForeignKey foreignKey = new ForeignKey();
-		foreignKey.setChildColumn(childColumn);
-		foreignKey.setParentTable(parentTable);
-		foreignKey.setParentColumn(id);
-		childTable.addForeignKey(foreignKey);
+		addForeignKeyToTable(parentTable, id, childColumn);
 		Assert.assertEquals("INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES (NULL);\n", writer.writeTableInsertions(childTable));
 	}
 
@@ -403,11 +395,7 @@ public class OracleScriptWriterTest {
 		table.addRow(data);
 		childColumn.setRequired(true);
 		childColumn.setForeignKey(true);
-		ForeignKey foreignKey = new ForeignKey();
-		foreignKey.setChildColumn(childColumn);
-		foreignKey.setParentTable(parentTable);
-		foreignKey.setParentColumn(id);
-		childTable.addForeignKey(foreignKey);
+		addForeignKeyToTable(parentTable, id, childColumn);
 		Assert.assertEquals("--INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES (2);\n", writer.writeTableInsertions(childTable));
 	}
 
@@ -429,11 +417,7 @@ public class OracleScriptWriterTest {
 		table.addRow(data);
 		childColumn.setRequired(true);
 		childColumn.setForeignKey(true);
-		ForeignKey foreignKey = new ForeignKey();
-		foreignKey.setChildColumn(childColumn);
-		foreignKey.setParentTable(parentTable);
-		foreignKey.setParentColumn(id);
-		childTable.addForeignKey(foreignKey);
+		addForeignKeyToTable(parentTable, id, childColumn);
 		Assert.assertEquals("--INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES ('AB');\n", writer.writeTableInsertions(childTable));
 	}
 
@@ -505,6 +489,39 @@ public class OracleScriptWriterTest {
 				writer.writeTableScript(table));
 	}
 
+	@Test
+	public void twoForeignKeysFirstExistsSecondDoesNot() {
+		Table parentTable = table;
+		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
+		id.setPrimary(true);
+		Row data = new Row(table);
+		data.add(id, 1);
+		table.addRow(data);
+		Table childTable = new Table();
+		childTable.setName("CHILD_TABLE");
+		database.addTable(childTable);
+		table = childTable;
+		Column childColumn1 = addColumnToTable("FOREIGN_ID1", new IntegerDataType(), 5);
+		Column childColumn2 = addColumnToTable("FOREIGN_ID2", new IntegerDataType(), 5);
+		data = new Row(table);
+		data.add(childColumn1, 1);
+		data.add(childColumn2, 2);
+		table.addRow(data);
+		childColumn1.setForeignKey(true);
+		childColumn2.setForeignKey(true);
+		addForeignKeyToTable(parentTable, id, childColumn1);
+		addForeignKeyToTable(parentTable, id, childColumn2);
+		Assert.assertEquals("--INSERT INTO CHILD_TABLE(FOREIGN_ID1, FOREIGN_ID2) VALUES (1, 2);\n", writer.writeTableInsertions(childTable));
+	}
+
+	private void addForeignKeyToTable(Table parentTable, Column id, Column childColumn) {
+		ForeignKey foreignKey = new ForeignKey();
+		foreignKey.setChildColumn(childColumn);
+		foreignKey.setParentTable(parentTable);
+		foreignKey.setParentColumn(id);
+		table.addForeignKey(foreignKey);
+	}
+
 	private void createDatabase() {
 		Table parentTable = table;
 		Column id = addColumnToTable("ID", new IntegerDataType(), 5);
@@ -522,11 +539,7 @@ public class OracleScriptWriterTest {
 		table.addRow(data);
 		childColumn.setRequired(true);
 		childColumn.setForeignKey(true);
-		ForeignKey foreignKey = new ForeignKey();
-		foreignKey.setChildColumn(childColumn);
-		foreignKey.setParentTable(parentTable);
-		foreignKey.setParentColumn(id);
-		childTable.addForeignKey(foreignKey);
+		addForeignKeyToTable(parentTable, id, childColumn);
 	}
 
 

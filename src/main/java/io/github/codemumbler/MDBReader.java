@@ -51,12 +51,18 @@ public class MDBReader {
 				if ( lookupColumn.equals("Table/Query") ) {
 					ForeignKey foreignKey = new ForeignKey();
 					String columns = parseSQL(column, "SELECT (.*) FROM.*");
-					String parentTable = parseSQL(column, ".*FROM (.*?);");
-					columns = columns.replaceAll("\\[" + parentTable + "\\]", "");
+					String parentTableName = parseSQL(column, ".*FROM (.*?);");
+					columns = columns.replaceAll("\\[" + parentTableName + "\\]", "");
 					columns = columns.replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\\.", "");
 					int boundColumn = (Short) readColumnProperty(column, "BoundColumn", 1);
-					foreignKey.setParentTable(database.getTable(parentTable));
-					foreignKey.setParentColumn(foreignKey.getParentTable().getColumn(columns.split(",")[boundColumn - 1]));
+					Table parentTable = database.getTable(parentTableName	);
+					if ( parentTable == null )
+						continue;
+					foreignKey.setParentTable(parentTable);
+					Column parentColumn = parentTable.getColumn(columns.split(",")[boundColumn - 1]);
+					if ( parentColumn == null )
+						continue;
+					foreignKey.setParentColumn(parentColumn);
 					foreignKey.setChildColumn(database.getTable(tableName).getColumn(column.getName()));
 					foreignKey.getChildColumn().setForeignKey(true);
 					database.getTable(tableName).addForeignKey(foreignKey);

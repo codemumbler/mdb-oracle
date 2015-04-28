@@ -41,7 +41,8 @@ public class Table {
 	}
 
 	public void addForeignKey(ForeignKey foreignKey) {
-		foreignKeys.add(foreignKey);
+		if ( !foreignKeys.contains(foreignKey) )
+			foreignKeys.add(foreignKey);
 	}
 
 	public Column getColumn(String columnName) {
@@ -83,13 +84,13 @@ public class Table {
 		for ( Column column : row.getColumns() ) {
 			if ( column.isForeignKey() ) {
 				for ( ForeignKey foreignKey : foreignKeys ) {
-					if ( foreignKey.getChildColumn().equals(column) && foreignKey.getParentTable().keyExists(foreignKey.getParentColumn(), row.get(column)) ) {
-						return true;
+					if ( foreignKey.getChildColumn().equals(column) && !foreignKey.getParentTable().keyExists(foreignKey.getParentColumn(), row.get(column)) ) {
+						return false;
 					}
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 
 	private boolean keyExists(Column parentColumn, Object value) {

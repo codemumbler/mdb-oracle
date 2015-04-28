@@ -323,6 +323,13 @@ public class MDBReaderTest {
 		Assert.assertEquals(2, database.getTable("SimpleTable").getNextValue());
 	}
 
+	@Test
+	public void badLookupTable() {
+		setUpMDBReader("badExamples.accdb");
+		table = database.getTable("notAGoodForeignKey");
+		Assert.assertEquals(0, table.getForeignKeys().size());
+	}
+
 	private ForeignKey simpleValesForeignKeys(int index) {
 		return database.getTable(SIMPLE_VALUES_TABLE).getForeignKeys().get(index);
 	}
