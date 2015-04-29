@@ -28,9 +28,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<scm>
-		<connection>scm:git:git@github.com:codemumbler/mdb-oracle.git</connection>
-		<developerConnection>scm:git:git@github.com:codemumbler/mdb-oracle.git</developerConnection>
-		<url>git@github.com:codemumbler/mdb-oracle.git</url>
+		<connection>scm:git:git://github.com/codemumbler/mdb-oracle.git</connection>
+		<developerConnection>scm:git:git://github.com/codemumbler/mdb-oracle.git</developerConnection>
+		<url>git@github.com/codemumbler/mdb-oracle.git</url>
 	</scm>
 	<distributionManagement>
 		<snapshotRepository>
