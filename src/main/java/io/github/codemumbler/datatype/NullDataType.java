@@ -10,7 +10,7 @@ public class NullDataType extends DataType {
 	}
 
 	@Override
-	public String writeValue(Object value) {
+	public String writeDataValue(Object value) {
 		throw new OracleScriptWriterException("Cannot create value for unknown dataType");
 	}
 }

@@ -8,7 +8,7 @@ public class NumberDataType extends DataType {
 	}
 
 	@Override
-	public String writeValue(Object value) {
+	public String writeDataValue(Object value) {
 		return value.toString();
 	}
 }

@@ -16,7 +16,7 @@ public class DateTime extends DataType {
 	}
 
 	@Override
-	public String writeValue(Object value) {
+	public String writeDataValue(Object value) {
 		Date date = (Date) value;
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 		return "TO_TIMESTAMP('" + simpleDateFormat.format(date) + "', 'MM/DD/YYYY HH24:MI:SS')";

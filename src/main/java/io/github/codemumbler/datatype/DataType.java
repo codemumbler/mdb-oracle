@@ -18,7 +18,13 @@ public abstract class DataType {
 
 	public abstract String getOracleType();
 
-	public abstract String writeValue(Object value);
+	public final String writeValue(Object value) {
+		if ( value == null )
+			return "NULL";
+		return writeDataValue(value);
+	}
+
+	protected abstract String writeDataValue(Object value);
 
 	public boolean isInsertable() {
 		return true;

@@ -8,7 +8,7 @@ public class Text extends DataType {
 	}
 
 	@Override
-	public String writeValue(Object value) {
+	protected String writeDataValue(Object value) {
 		String strValue = (String) value;
 		strValue = strValue.replaceAll("'", "''").replaceAll("\r\n", "' || chr(13) || chr(10) ||'");
 		return "'" + strValue + "'";

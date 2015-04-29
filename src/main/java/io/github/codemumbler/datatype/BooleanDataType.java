@@ -8,7 +8,7 @@ public class BooleanDataType extends DataType {
 	}
 
 	@Override
-	public String writeValue(Object value) {
+	public String writeDataValue(Object value) {
 		return ((Boolean) value ? "'Y'" : "'N'");
 	}
 }

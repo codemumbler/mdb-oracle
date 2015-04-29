@@ -32,6 +32,7 @@ public class OracleScriptWriter {
 			"UPDATE %s SET %s = str WHERE %s;\nEND;\n/\n";
 	private static final String FOREIGN_KEY = "\nALTER TABLE %1$s ADD CONSTRAINT %1$s_FK%2$d FOREIGN KEY (%3$s)\n" +
 			"\tREFERENCES %4$s (%5$s) ENABLE;\n";
+	private static final Number ZERO = 0;
 
 	private final Database database;
 
@@ -171,8 +172,8 @@ public class OracleScriptWriter {
 			if ( !column.getDataType().isInsertable() )
 				continue;
 			Object value = row.get(column);
-			if ( value == null || isNullForeignKey(column, value))
-				builder.append("NULL");
+			if ( isNullableForeignKey(column, value) )
+				builder.append(column.getDataType().writeValue(null));
 			else
 				builder.append(column.getDataType().writeValue(row.get(column)));
 			builder.append(", ");
@@ -181,8 +182,8 @@ public class OracleScriptWriter {
 		return builder.toString();
 	}
 
-	private boolean isNullForeignKey(Column column, Object value) {
-		return column.getDataType() instanceof NumberDataType && !column.isRequired() && column.isForeignKey() && value.equals(0);
+	private boolean isNullableForeignKey(Column column, Object value) {
+		return column.getDataType() instanceof NumberDataType && !column.isRequired() && column.isForeignKey() && ZERO.equals(value);
 	}
 
 	private String tableColumnsToString(Table table) {

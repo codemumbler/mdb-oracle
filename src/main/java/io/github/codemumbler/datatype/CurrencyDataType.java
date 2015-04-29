@@ -15,7 +15,7 @@ public class CurrencyDataType extends PrecisionDataType {
 	}
 
 	@Override
-	public String writeValue(Object value) {
+	public String writeDataValue(Object value) {
 		BigDecimal money = (BigDecimal) value;
 		return money.toPlainString();
 	}
