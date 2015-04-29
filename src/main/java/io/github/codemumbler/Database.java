@@ -3,6 +3,9 @@ package io.github.codemumbler;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A Java representation of the Access database.
+ */
 public class Database {
 
 	private String schemaName;

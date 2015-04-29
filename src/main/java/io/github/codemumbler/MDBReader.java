@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Reads in an Access Database file (.mdb or .accdb) and generates an @see io.github.codemumbler.Database.
+ *
+ */
 public class MDBReader {
 
 	private Database database;
