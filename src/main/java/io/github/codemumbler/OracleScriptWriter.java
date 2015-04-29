@@ -47,7 +47,6 @@ public class OracleScriptWriter {
 		StringBuilder tableCreateScript = new StringBuilder("CREATE TABLE ");
 		StringBuilder tableAlterationsScript = new StringBuilder();
 		StringBuilder primaryColumns = new StringBuilder();
-		int uniqueIndexNumber = 1;
 		String tableName = cleanName(table.getName());
 		tableCreateScript.append(tableName).append(" (\n");
 		if ( table.getColumns().isEmpty() )
@@ -78,7 +77,7 @@ public class OracleScriptWriter {
 		}
 		if ( !primaryColumns.toString().isEmpty() ) {
 			primaryColumns.delete(primaryColumns.length() - 2, primaryColumns.length());
-			tableAlterationsScript.append(String.format(UNIQUE, tableName, primaryColumns, uniqueIndexNumber++));
+			tableAlterationsScript.append(String.format(UNIQUE, tableName, primaryColumns, 1));
 			tableAlterationsScript.append(String.format(PRIMARY, tableName, primaryColumns));
 		}
 		tableCreateScript = tableCreateScript.deleteCharAt(tableCreateScript.length() - 2);

@@ -54,7 +54,7 @@ public class MDBReaderTest {
 	@Test
 	public void tableCount() {
 		setUpMDBReader(SIMPLE_DATABASE_FILE);
-		Assert.assertEquals(2, database.getTables().size());
+		Assert.assertEquals(3, database.getTables().size());
 	}
 
 	@Test
@@ -260,7 +260,7 @@ public class MDBReaderTest {
 	@Test
 	public void foreignKeysCount() {
 		setUpSimpleDatabase();
-		Assert.assertEquals(2, database.getTable(SIMPLE_VALUES_TABLE).getForeignKeys().size());
+		Assert.assertEquals(3, database.getTable(SIMPLE_VALUES_TABLE).getForeignKeys().size());
 	}
 
 	@Test

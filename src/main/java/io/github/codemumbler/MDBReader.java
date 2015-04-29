@@ -6,6 +6,7 @@ import com.healthmarketscience.jackcess.PropertyMap;
 import com.healthmarketscience.jackcess.Relationship;
 import io.github.codemumbler.datatype.DataType;
 import io.github.codemumbler.datatype.DataTypeFactory;
+import io.github.codemumbler.datatype.NumberDataType;
 import io.github.codemumbler.datatype.PrecisionDataType;
 
 import java.io.File;
@@ -17,8 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MDBReader {
-
-	private static final int DEFAULT_PRECISION = 5;
 
 	private Database database;
 	private DataTypeFactory factory = new DataTypeFactory();
@@ -101,7 +100,8 @@ public class MDBReader {
 			table.setName(tableName);
 			table.addAllColumns(readTableColumns(tableName));
 			readTableData(table);
-			table.setNextValue(findMaxPrimaryKeyValue(table) + 1);
+			if ( table.hasPrimaryKey() && table.getPrimaryColumn().getDataType() instanceof NumberDataType )
+				table.setNextValue(findMaxPrimaryKeyValue(table) + 1);
 			database.addTable(table);
 		}
 	}
@@ -113,7 +113,10 @@ public class MDBReader {
 			if ( column.isPrimary() )
 				primaryColumn = column;
 		for ( Row row : table.getRows() ) {
-			maxValue = Math.max(maxValue, (Integer) row.get(primaryColumn));
+			if ( row.get(primaryColumn) != null ){
+				Number value = (Number) row.get(primaryColumn);
+				maxValue = Math.max(maxValue, value.intValue());
+			}
 		}
 		return maxValue;
 	}
@@ -148,7 +151,8 @@ public class MDBReader {
 	}
 
 	private int precision(com.healthmarketscience.jackcess.Column originalColumn, PrecisionDataType dataType) throws IOException {
-		int precision = (Byte) readColumnProperty(originalColumn, "DecimalPlaces", dataType.getDefaultPrecision());
+		Number number = (Number) readColumnProperty(originalColumn, "DecimalPlaces", dataType.getDefaultPrecision());
+		int precision = number.intValue();
 		if (precision <= 0)
 			precision = dataType.getDefaultPrecision();
 		return precision;

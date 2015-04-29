@@ -1,7 +1,5 @@
 package io.github.codemumbler;
 
-import io.github.codemumbler.datatype.NumberDataType;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
