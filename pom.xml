@@ -29,7 +29,7 @@
 	</properties>
 	<scm>
 		<connection>scm:git:https://github.com/codemumbler/mdb-oracle.git</connection>
-		<developerConnection>scm:git:git@github.com:codemumbler/mdb-oracle.git</developerConnection>
+		<developerConnection>scm:git:ssh://git@github.com/codemumbler/mdb-oracle.git</developerConnection>
 		<url>https://github.com/codemumbler/mdb-oracle.git</url>
 	</scm>
 	<distributionManagement>
