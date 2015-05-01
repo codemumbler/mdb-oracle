@@ -75,6 +75,7 @@
 				<configuration>
 					<releaseProfiles>release</releaseProfiles>
 					<useReleaseProfile>true</useReleaseProfile>
+					<pushChanges>false</pushChanges>
 				</configuration>
 			</plugin>
 		</plugins>
