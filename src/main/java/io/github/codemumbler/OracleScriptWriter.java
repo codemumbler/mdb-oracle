@@ -125,12 +125,18 @@ public class OracleScriptWriter {
 	}
 
 	public String writeTableInsertions(Table table) {
+		return writeTableInsertions(table, false);
+	}
+
+	private String writeTableInsertions(Table table, boolean onlyInvalidData) {
 		String tableName = cleanName(table.getName());
 		String columns = tableColumnsToString(table);
 		StringBuilder insertions = new StringBuilder();
 		for ( Row row : table.getRows() ) {
 			if ( !table.getForeignKeys().isEmpty() && !table.parentTablesHaveForeignKeyValue(row) )
 				insertions.append("--");
+			else if (onlyInvalidData)
+				continue;
 			String values = rowValues(row);
 			insertions.append(String.format(INSERTION, tableName, columns, values));
 			insertions.append(additionalUpdates(row));
@@ -242,6 +248,14 @@ public class OracleScriptWriter {
 		}
 		for ( Table table : database.getTables() ) {
 			builder.append(writeForeignKey(table));
+		}
+		return builder.toString();
+	}
+
+	public String writeInvalidData() {
+		StringBuilder builder = new StringBuilder();
+		for ( Table table : database.getTables() ) {
+			builder.append(writeTableInsertions(table, true));
 		}
 		return builder.toString();
 	}

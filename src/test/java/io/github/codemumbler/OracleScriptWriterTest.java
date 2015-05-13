@@ -514,6 +514,15 @@ public class OracleScriptWriterTest {
 		Assert.assertEquals("--INSERT INTO CHILD_TABLE(FOREIGN_ID1, FOREIGN_ID2) VALUES (1, 2);\n", writer.writeTableInsertions(childTable));
 	}
 
+	@Test
+	public void writeOnlyTheBadData() {
+		createDatabase();
+		Row data = new Row(table);
+		data.add(table.getColumns().get(0), 2);
+		table.addRow(data);
+		Assert.assertEquals("--INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES (2);\n", writer.writeInvalidData());
+	}
+
 	private void addForeignKeyToTable(Table parentTable, Column id, Column childColumn) {
 		ForeignKey foreignKey = new ForeignKey();
 		foreignKey.setChildColumn(childColumn);
