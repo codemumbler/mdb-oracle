@@ -18,7 +18,8 @@ public class OracleScriptWriter {
 			"SELECT", "WHERE", "FROM");
 	private static final String UNIQUE = "\nCREATE UNIQUE INDEX %1$s_UK%3$d ON %1$s (%2$s);\n";
 	private static final String PRIMARY = "\nALTER TABLE %1$s ADD CONSTRAINT %1$s_PK PRIMARY KEY (%2$s) ENABLE;\n";
-	private static final String SEQUENCE = "\nCREATE SEQUENCE %s_SEQ MINVALUE 1 MAXVALUE %s INCREMENT BY 1 START WITH %d NOCACHE NOORDER NOCYCLE;\n";
+	private static final String SEQUENCE = "\nCREATE SEQUENCE %s_SEQ MINVALUE 1 MAXVALUE %s INCREMENT BY 1 START " +
+			"WITH %d NOCACHE NOORDER NOCYCLE;\n";
 	private static final String TRIGGER = "\nCREATE OR REPLACE TRIGGER %1$s_TRIG\n" +
 			"BEFORE INSERT ON %1$s\n" +
 			"FOR EACH ROW BEGIN\n" +
@@ -43,10 +44,21 @@ public class OracleScriptWriter {
 		this.database = database;
 	}
 
+	/**
+	 * Generates the script that a DBA account can run to create the schema.  Remember to modify the password.
+	 *
+	 * @return schema creation script.
+	 */
 	public String writeSchemaScript() {
 		return String.format(SCHEMA_CREATION, database.getSchemaName());
 	}
 
+	/**
+	 * Generates the Oracle SQL for a single table, complete with sequences, triggers, constraints and primary keys.
+	 *
+	 * @param table the table to have generated the script.
+	 * @return the generated Oracle SQL.
+	 */
 	public String writeTableScript(Table table) {
 		StringBuilder tableCreateScript = new StringBuilder("CREATE TABLE ");
 		StringBuilder tableAlterationsScript = new StringBuilder();
@@ -91,6 +103,12 @@ public class OracleScriptWriter {
 		return tableCreateScript.toString();
 	}
 
+	/**
+	 * MS Access names can contain characters that Oracle names cannot.
+	 *
+	 * @param name MS Access name.
+	 * @return Oracle ready name based on the MS Access name.
+	 */
 	public String cleanName(String name) {
 		if ( RESERVED_WORDS.contains(name.toUpperCase()) )
 			return name.toUpperCase() + "_";
@@ -116,6 +134,12 @@ public class OracleScriptWriter {
 		return name.toUpperCase();
 	}
 
+	/**
+	 * Checks if the entire list is all true.
+	 *
+	 * @param uppers a Boolean list.
+	 * @return true if the entire list is true, otherwise false.
+	 */
 	private boolean isOnlyUpperCase(List<Boolean> uppers) {
 		for ( Boolean bool : uppers ) {
 			if ( !bool )
@@ -124,10 +148,24 @@ public class OracleScriptWriter {
 		return true;
 	}
 
+	/**
+	 * Generates the SQL script for a single table's data insertions. Invalid data (where foreign key values do not exist)
+	 * are written as a commented out insertion statement.
+	 *
+	 * @param table the table to generate the insertions for.
+	 * @return Generated SQL to insert into a given table.
+	 */
 	public String writeTableInsertions(Table table) {
 		return writeTableInsertions(table, false);
 	}
 
+	/**
+	 * Generates the SQL script for a single table's data insertions.
+	 *
+ 	 * @param table the table to generate the insertions for.
+	 * @param onlyInvalidData set to true to only write invalid data as comments.
+	 * @return Generated SQL insertions for a table's data.
+	 */
 	private String writeTableInsertions(Table table, boolean onlyInvalidData) {
 		String tableName = cleanName(table.getName());
 		String columns = tableColumnsToString(table);
@@ -205,6 +243,12 @@ public class OracleScriptWriter {
 		return builder.toString();
 	}
 
+	/**
+	 * Generates foreign keys SQL statements for a table.
+	 *
+	 * @param table the table to write the foreign keys.
+	 * @return Oracle Alter table statements to add foreign keys to a table.
+	 */
 	public String writeForeignKey(Table table) {
 		StringBuilder builder = new StringBuilder();
 		int foreignKeyIndex = 1;
@@ -219,6 +263,11 @@ public class OracleScriptWriter {
 		return builder.toString();
 	}
 
+	/**
+	 * Generates the SQL statements for all tables, sequences, keys and triggers in the database schema.
+	 *
+	 * @return the generated SQL statements to create the entire database schema.
+	 */
 	public String writeDDLScript() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(writeSchemaScript());
@@ -229,6 +278,11 @@ public class OracleScriptWriter {
 		return builder.toString();
 	}
 
+	/**
+	 * Generates data insertion statements for all tables in the database schema.
+	 *
+	 * @return the generated SQL insertion statements.
+	 */
 	public String writeDatabaseInsertions() {
 		StringBuilder builder = new StringBuilder();
 		for ( Table table : database.getTables() ) {
@@ -237,6 +291,11 @@ public class OracleScriptWriter {
 		return builder.toString();
 	}
 
+	/**
+	 * Generates the DDL and DML statements for the entire database schema.
+	 *
+	 * @return the generated SQL statements for recreating the schema in Oracle.
+	 */
 	public String writeScript() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(writeSchemaScript());
@@ -252,6 +311,11 @@ public class OracleScriptWriter {
 		return builder.toString();
 	}
 
+	/**
+	 * Generates commented SQL statements for the invalid data.
+	 *
+ 	 * @return commented out SQL insertions for the invalid data.
+	 */
 	public String writeInvalidData() {
 		StringBuilder builder = new StringBuilder();
 		for ( Table table : database.getTables() ) {
