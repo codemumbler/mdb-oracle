@@ -16,7 +16,7 @@ public class ScriptRunnerTest {
 
 	@BeforeClass
 	public static void setUpClass() {
-		database = new CloakDatabase("jdbc/sample_db", CloakDatabase.ORACLE, "SELECT 1 FROM DUAL;");
+		database = new CloakDatabase("jdbc/sample_db", CloakDatabase.ORACLE, "");
 	}
 
 	@After
