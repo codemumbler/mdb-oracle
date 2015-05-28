@@ -4,7 +4,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 public class ScriptRunner {
@@ -15,10 +14,14 @@ public class ScriptRunner {
 		return (DataSource) env.lookup("jdbc/sample_db");
 	}
 
-	public void executeScript(String s) throws Exception {
-		try (Connection connection = getDataSource().getConnection();
-			Statement statement = connection.createStatement()) {
-			statement.executeUpdate(s);
-		}
+	public void executeScript(String sql) throws Exception {
+		if ( sql == null )
+			return;
+		String[] sqlStatements = sql.trim().split(";");
+		for ( String sqlStatement : sqlStatements )
+			try (Connection connection = getDataSource().getConnection();
+				Statement statement = connection.createStatement()) {
+				statement.executeUpdate(sqlStatement);
+			}
 	}
 }
