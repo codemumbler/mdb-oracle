@@ -18,10 +18,14 @@ public class ScriptRunner {
 		if ( sql == null )
 			return;
 		String[] sqlStatements = sql.trim().split(";");
-		for ( String sqlStatement : sqlStatements )
+		for ( String sqlStatement : sqlStatements ) {
+			sqlStatement = sqlStatement.trim();
+			if (sqlStatement.startsWith("--"))
+				continue;
 			try (Connection connection = getDataSource().getConnection();
-				Statement statement = connection.createStatement()) {
+				 Statement statement = connection.createStatement()) {
 				statement.executeUpdate(sqlStatement);
 			}
+		}
 	}
 }

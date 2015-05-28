@@ -59,6 +59,14 @@ public class ScriptRunnerTest {
 		Assert.assertEquals(1, runCountQuery());
 	}
 
+	@Test
+	public void ignoreComments() throws Exception {
+		runner.executeScript("CREATE TABLE TEST_TABLE (\n" +
+				"\tTEST_COLUMN_ID NUMBER(5)\n" +
+				");\n--INSERT INTO TEST_TABLE (TEST_COLUMN_ID) VALUES (1);");
+		Assert.assertEquals(0, runCountQuery());
+	}
+
 	private int runCountQuery() throws Exception {
 		InitialContext context = new InitialContext();
 		Context env = (Context) context.lookup("java:/comp/env");
