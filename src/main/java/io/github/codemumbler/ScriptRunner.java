@@ -28,4 +28,9 @@ public class ScriptRunner {
 			}
 		}
 	}
+
+	public void executeCreation(Database database) throws Exception {
+		OracleScriptWriter writer = new OracleScriptWriter(database);
+		executeScript(writer.writeScript());
+	}
 }
