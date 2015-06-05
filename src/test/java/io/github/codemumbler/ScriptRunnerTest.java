@@ -72,6 +72,23 @@ public class ScriptRunnerTest extends CloakAbstractTestCase {
 	}
 
 	@Test
+	public void trigger() throws Exception {
+		runner.executeScript("CREATE TABLE test_table ( id NUMBER(5) NOT NULL, name VARCHAR2(5) );\n" +
+				"CREATE SEQUENCE test_seq MINVALUE 1 MAXVALUE 999999999 INCREMENT BY 1 START WITH 3;\n" +
+				"CREATE OR REPLACE TRIGGER test_trig\n" +
+				"BEFORE INSERT ON test_table\n" +
+				"FOR EACH ROW BEGIN\n" +
+				"\tIF :NEW.id IS NULL THEN\n" +
+				"\t\tSELECT test_seq.nextVal\n" +
+				"\t\tINTO :NEW.id\n" +
+				"\t\tFROM dual;\n" +
+				"\tEND IF;\n" +
+				"END;\n" +
+				"/\nINSERT INTO test_table (name) VALUES ('name1');");
+		Assert.assertEquals(3, runIntQuery("SELECT id FROM test_table WHERE name = 'name1'"));
+	}
+
+	@Test
 	public void buildFromDatabaseObject() throws Exception {
 		Table table = new Table();
 		table.setName("TEST_TABLE");
@@ -82,20 +99,25 @@ public class ScriptRunnerTest extends CloakAbstractTestCase {
 	}
 
 	private int runCountQuery() throws Exception {
+		return runIntQuery("SELECT COUNT(*) FROM TEST_TABLE");
+	}
+
+	private int runIntQuery(String sql) throws Exception {
 		InitialContext context = new InitialContext();
 		Context env = (Context) context.lookup("java:/comp/env");
 		DataSource dataSource = (DataSource) env.lookup("jdbc/sample_db");
 		Connection connection = dataSource.getConnection();
 		Statement statement = connection.createStatement();
-		ResultSet results = statement.executeQuery("SELECT COUNT(*) FROM TEST_TABLE");
-		int count = 0;
+		ResultSet results = statement.executeQuery(sql);
+		int integerResult = 0;
 		if ( results.next() )
-			count = results.getInt(1);
+			integerResult = results.getInt(1);
 		results.close();
 		statement.close();
 		connection.close();
-		return count;
+		return integerResult;
 	}
+
 
 	private Column addColumnToTable(Table table, String name, DataType type, int length) {
 		Column column = new Column();
