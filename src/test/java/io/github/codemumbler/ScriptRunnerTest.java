@@ -30,8 +30,8 @@ public class ScriptRunnerTest extends CloakAbstractTestCase {
 	}
 
 	@Before
-	public void setUp() {
-		runner = new ScriptRunner();
+	public void setUp() throws Exception {
+		runner = new ScriptRunner(getDataSource());
 		database = new Database();
 	}
 
@@ -103,10 +103,7 @@ public class ScriptRunnerTest extends CloakAbstractTestCase {
 	}
 
 	private int runIntQuery(String sql) throws Exception {
-		InitialContext context = new InitialContext();
-		Context env = (Context) context.lookup("java:/comp/env");
-		DataSource dataSource = (DataSource) env.lookup("jdbc/sample_db");
-		Connection connection = dataSource.getConnection();
+		Connection connection = getDataSource().getConnection();
 		Statement statement = connection.createStatement();
 		ResultSet results = statement.executeQuery(sql);
 		int integerResult = 0;
@@ -118,6 +115,11 @@ public class ScriptRunnerTest extends CloakAbstractTestCase {
 		return integerResult;
 	}
 
+	private DataSource getDataSource() throws Exception {
+		InitialContext context = new InitialContext();
+		Context env = (Context) context.lookup("java:/comp/env");
+		return (DataSource) env.lookup("jdbc/sample_db");
+	}
 
 	private Column addColumnToTable(Table table, String name, DataType type, int length) {
 		Column column = new Column();

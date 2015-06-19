@@ -1,7 +1,5 @@
 package io.github.codemumbler;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import java.io.LineNumberReader;
 import java.io.StringReader;
@@ -10,17 +8,17 @@ import java.sql.Statement;
 
 public class ScriptRunner {
 
-	private DataSource getDataSource() throws Exception  {
-		InitialContext context = new InitialContext();
-		Context env = (Context) context.lookup("java:/comp/env");
-		return (DataSource) env.lookup("jdbc/sample_db");
+	private final DataSource dataSource;
+
+	public ScriptRunner(DataSource dataSource) {
+		this.dataSource = dataSource;
 	}
 
-	public void executeScript(String sql) throws Exception {
+	public void executeScript(final String sql) throws Exception {
 		if ( sql == null )
 			return;
 		StringBuilder sqlStatement = null;
-		try (Connection connection = getDataSource().getConnection()) {
+		try (Connection connection = dataSource.getConnection()) {
 			connection.setAutoCommit(true);
 			LineNumberReader lineReader = new LineNumberReader(new StringReader(sql));
 			String line;
@@ -49,12 +47,11 @@ public class ScriptRunner {
 					sqlStatement = null;
 					closeableStatements = 0;
 				}
-
 			}
 		}
 	}
 
-	public void executeCreation(Database database) throws Exception {
+	public void executeCreation(final Database database) throws Exception {
 		OracleScriptWriter writer = new OracleScriptWriter(database);
 		executeScript(writer.writeScript());
 	}
