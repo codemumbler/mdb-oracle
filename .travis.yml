@@ -8,6 +8,6 @@ env:
     - ORACLE_SID=XE
 
 before_install:
-  - ./.travis/oracle/download.sh
-  - ./.travis/oracle/install.sh
-  - ./.travis/mvn-ojdbc.sh
+  - .travis/oracle/download.sh
+  - .travis/oracle/install.sh
+  - .travis/mvn-ojdbc.sh
