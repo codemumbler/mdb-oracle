@@ -6,7 +6,6 @@ env:
     - ORACLE_FILE=ojdbc6.jar
 
 before_install:
-  - chmod a+x .travis/oracle/*.sh
   - chmod a+x .travis/*.sh
-  - .travis/oracle/download.sh
+  - .travis/download.sh
   - .travis/mvn-ojdbc.sh
