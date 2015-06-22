@@ -1,16 +1,27 @@
 package io.github.codemumbler;
 
+import oracle.jdbc.pool.OracleDataSource;
+
 import javax.sql.DataSource;
 import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 public class ScriptRunner {
 
 	private final DataSource dataSource;
 
-	public ScriptRunner(DataSource dataSource) {
+	public ScriptRunner(final String jdbcUrl, final String username, final String password) throws SQLException {
+		OracleDataSource ds = new OracleDataSource();
+		ds.setURL(jdbcUrl);
+		ds.setUser(username);
+		ds.setPassword(password);
+		this.dataSource = ds;
+	}
+
+	public ScriptRunner(final DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
