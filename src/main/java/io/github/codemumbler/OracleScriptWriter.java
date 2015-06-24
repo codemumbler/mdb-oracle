@@ -15,7 +15,7 @@ public class OracleScriptWriter {
 			"-- GRANT CONNECT, RESOURCE, CREATE SESSION, CREATE TABLE, CREATE VIEW,\n" +
 			"-- \tCREATE PROCEDURE,CREATE SYNONYM, CREATE SEQUENCE, CREATE TRIGGER TO %1$s;\n";
 	private static final List<String> RESERVED_WORDS = Arrays.asList("SQL", "GROUP", "LANGUAGE", "BY", "DECLARE",
-			"SELECT", "WHERE", "FROM");
+			"SELECT", "WHERE", "FROM", "NUMBER");
 	private static final String UNIQUE = "\nCREATE UNIQUE INDEX %1$s_UK%3$d ON %1$s (%2$s);\n";
 	private static final String PRIMARY = "\nALTER TABLE %1$s ADD CONSTRAINT %1$s_PK PRIMARY KEY (%2$s) ENABLE;\n";
 	private static final String SEQUENCE = "\nCREATE SEQUENCE %s_SEQ MINVALUE 1 MAXVALUE %s INCREMENT BY 1 START " +
