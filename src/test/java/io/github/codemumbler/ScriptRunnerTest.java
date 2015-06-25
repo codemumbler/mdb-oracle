@@ -98,6 +98,11 @@ public class ScriptRunnerTest extends CloakAbstractTestCase {
 		Assert.assertEquals(0, runCountQuery());
 	}
 
+	@Test(expected = MDBException.class)
+	public void badSQLThrowsException() throws Exception {
+		runner.executeScript("SELECT bad_column TEST badly_formed SQL;");
+	}
+
 	private int runCountQuery() throws Exception {
 		return runIntQuery("SELECT COUNT(*) FROM TEST_TABLE");
 	}

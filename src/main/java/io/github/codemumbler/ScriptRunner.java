@@ -52,9 +52,11 @@ public class ScriptRunner {
 						closeableStatements--;
 				}
 				if (line.contains(";") && closeableStatements <= 0) {
-					Statement statement = connection.createStatement();
-					statement.execute(sqlStatement.toString());
-					statement.close();
+					try (Statement statement = connection.createStatement()){
+						statement.execute(sqlStatement.toString());
+					} catch (Exception e) {
+						throw new MDBException("The follow SQL statement failed: " + sqlStatement.toString(), e);
+					}
 					sqlStatement = null;
 					closeableStatements = 0;
 				}
