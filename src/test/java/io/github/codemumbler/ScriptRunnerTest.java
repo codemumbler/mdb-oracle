@@ -51,7 +51,7 @@ public class ScriptRunnerTest extends CloakAbstractTestCase {
 	public void runSimpleCreateTable() throws Exception {
 		runner.executeScript("CREATE TABLE TEST_TABLE (\n" +
 				"\tTEST_COLUMN_ID NUMBER(5)\n" +
-				");\n");
+				");");
 		Assert.assertEquals(0, runCountQuery());
 	}
 
@@ -111,7 +111,7 @@ public class ScriptRunnerTest extends CloakAbstractTestCase {
 		Connection connection = getDataSource().getConnection();
 		Statement statement = connection.createStatement();
 		ResultSet results = statement.executeQuery(sql);
-		int integerResult = 0;
+		int integerResult = -1;
 		if ( results.next() )
 			integerResult = results.getInt(1);
 		results.close();

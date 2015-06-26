@@ -42,16 +42,17 @@ public class ScriptRunner {
 					continue;
 				else {
 					sqlStatement.append(line).append("\n");
-					if (line.contains("FOR ") && !line.contains("END;"))
+					if ((line.contains("FOR ") && !line.contains("END;")) ||
+							(line.contains("IF") && !line.contains("END IF;")) ||
+							(line.contains("DECLARE") && !line.contains("END;")))
 						closeableStatements++;
-					else if (line.contains("IF") && !line.contains("END IF;"))
-						closeableStatements++;
-					if (line.contains("END IF;"))
-						closeableStatements--;
-					else if (line.contains("END;"))
+					if (line.contains("END IF;") || line.contains("END;"))
 						closeableStatements--;
 				}
 				if (line.contains(";") && closeableStatements <= 0) {
+					//remove last semi-colon?
+					if (!sqlStatement.toString().toUpperCase().endsWith("END;\n") )
+						sqlStatement = sqlStatement.delete(sqlStatement.lastIndexOf(";"), sqlStatement.length()-1);
 					try (Statement statement = connection.createStatement()){
 						statement.execute(sqlStatement.toString());
 					} catch (Exception e) {
