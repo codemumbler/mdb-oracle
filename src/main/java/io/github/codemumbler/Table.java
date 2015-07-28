@@ -101,4 +101,11 @@ public class Table {
 		}
 		return indexedValues.get(parentColumn).contains(" " + value + ",");
 	}
+
+  @Override
+  public String toString() {
+    return "Table{" +
+        "name='" + name + '\'' +
+        '}';
+  }
 }

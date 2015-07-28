@@ -273,6 +273,8 @@ public class OracleScriptWriter {
 		builder.append(writeSchemaScript());
 		for ( Table table : database.getTables() ) {
 			builder.append(writeTableScript(table));
+		}
+		for ( Table table : database.getTables() ) {
 			builder.append(writeForeignKey(table));
 		}
 		return builder.toString();

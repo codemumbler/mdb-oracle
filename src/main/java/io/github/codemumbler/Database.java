@@ -1,6 +1,7 @@
 package io.github.codemumbler;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -20,7 +21,21 @@ public class Database {
 	}
 
 	public List<Table> getTables() {
-		return tables;
+		List<Table> orderedTables = new LinkedList<>();
+		for (Table table : tables) {
+			if (!table.getForeignKeys().isEmpty()) {
+				for (ForeignKey key : table.getForeignKeys()) {
+					if (orderedTables.contains(key.getParentTable()) && !orderedTables.contains(table)) {
+						int parentTableIndex = Math.max(0, orderedTables.indexOf(key.getParentTable()) - 1);
+						orderedTables.add(parentTableIndex, table);
+					}
+				}
+			}
+			if (!orderedTables.contains(table)) {
+				orderedTables.add(table);
+			}
+		}
+		return orderedTables;
 	}
 
 	public void addTable(Table table) {
