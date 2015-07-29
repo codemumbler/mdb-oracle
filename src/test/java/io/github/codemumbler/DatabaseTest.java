@@ -52,7 +52,7 @@ public class DatabaseTest {
     childColumn.setForeignKey(true);
     addForeignKeyToTable(parentTable, id, childTable, childColumn);
 
-    Assert.assertEquals("[Table{name='CHILD_TABLE'}, Table{name='PARENT_TABLE'}]", database.getTables().toString());
+    Assert.assertEquals("[Table{name='PARENT_TABLE'}, Table{name='CHILD_TABLE'}]", database.getTables().toString());
   }
 
   private Column addColumnToTable(Table table, String name, DataType type, int length) {

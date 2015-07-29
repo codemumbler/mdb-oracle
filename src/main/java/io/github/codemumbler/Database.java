@@ -23,17 +23,24 @@ public class Database {
 	public List<Table> getTables() {
 		List<Table> orderedTables = new LinkedList<>();
 		for (Table table : tables) {
+			int parentTableIndex = orderedTables.size();
 			if (!table.getForeignKeys().isEmpty()) {
 				for (ForeignKey key : table.getForeignKeys()) {
 					if (orderedTables.contains(key.getParentTable()) && !orderedTables.contains(table)) {
-						int parentTableIndex = Math.max(0, orderedTables.indexOf(key.getParentTable()) - 1);
-						orderedTables.add(parentTableIndex, table);
+						parentTableIndex = Math.max(0, orderedTables.indexOf(key.getParentTable()) + 1);
 					}
 				}
 			}
-			if (!orderedTables.contains(table)) {
-				orderedTables.add(table);
+			for (Table orderedTable : orderedTables) {
+				if (!orderedTable.getForeignKeys().isEmpty()) {
+					for (ForeignKey key : orderedTable.getForeignKeys()) {
+						if (table.equals(key.getParentTable()) && !orderedTables.contains(table)) {
+							parentTableIndex = Math.max(0, orderedTables.indexOf(key.getParentTable()));
+						}
+					}
+				}
 			}
+			orderedTables.add(parentTableIndex, table);
 		}
 		return orderedTables;
 	}

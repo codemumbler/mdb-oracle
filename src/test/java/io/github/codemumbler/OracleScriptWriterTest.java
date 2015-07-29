@@ -425,24 +425,24 @@ public class OracleScriptWriterTest {
 	public void writeFullDDLScript() {
 		createDatabase();
 		Assert.assertEquals("--CREATE USER TEST_SCHEMA IDENTIFIED BY password2Change;\n"
-				+ "-- GRANT CONNECT, RESOURCE, CREATE SESSION, CREATE TABLE, CREATE VIEW,\n"
-				+ "-- \tCREATE PROCEDURE,CREATE SYNONYM, CREATE SEQUENCE, CREATE TRIGGER TO TEST_SCHEMA;\n" + "CREATE TABLE CHILD_TABLE (\n"
-				+ "\tFOREIGN_ID NUMBER(5) NOT NULL\n" + ");\n" + "CREATE TABLE TEST_TABLE (\n" + "\tID NUMBER(5)\n" + ");\n" + "\n"
-				+ "CREATE UNIQUE INDEX TEST_TABLE_UK1 ON TEST_TABLE (ID);\n" + "\n"
-				+ "ALTER TABLE TEST_TABLE ADD CONSTRAINT TEST_TABLE_PK PRIMARY KEY (ID) ENABLE;\n" + "\n"
-				+ "ALTER TABLE CHILD_TABLE ADD CONSTRAINT CHILD_TABLE_FK1 FOREIGN KEY (FOREIGN_ID)\n" + "\tREFERENCES TEST_TABLE (ID) ENABLE;\n",
+						+ "-- GRANT CONNECT, RESOURCE, CREATE SESSION, CREATE TABLE, CREATE VIEW,\n"
+						+ "-- \tCREATE PROCEDURE,CREATE SYNONYM, CREATE SEQUENCE, CREATE TRIGGER TO TEST_SCHEMA;\n" + "CREATE TABLE TEST_TABLE (\n"
+						+ "\tID NUMBER(5)\n" + ");\n" + "\n" + "CREATE UNIQUE INDEX TEST_TABLE_UK1 ON TEST_TABLE (ID);\n" + "\n"
+						+ "ALTER TABLE TEST_TABLE ADD CONSTRAINT TEST_TABLE_PK PRIMARY KEY (ID) ENABLE;\n" + "CREATE TABLE CHILD_TABLE (\n"
+						+ "\tFOREIGN_ID NUMBER(5) NOT NULL\n" + ");\n" + "\n"
+						+ "ALTER TABLE CHILD_TABLE ADD CONSTRAINT CHILD_TABLE_FK1 FOREIGN KEY (FOREIGN_ID)\n" + "\tREFERENCES TEST_TABLE (ID) ENABLE;\n",
 				writer.writeDDLScript());
 	}
 
 	@Test
 	public void writeFullInsertionScript() {
 		createDatabase();
-		Assert.assertEquals("INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES (1);\nINSERT INTO TEST_TABLE(ID) VALUES (1);\n",
+		Assert.assertEquals("INSERT INTO TEST_TABLE(ID) VALUES (1);\nINSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES (1);\n",
 				writer.writeDatabaseInsertions());
 	}
 
 	@Test
-	public void writeFullInsertionsInCorrectOrder() {
+	public void writeFullInsertionsTablesAddedReverseOrder() {
 		Table childTable = table;
 		Column childColumn = addColumnToTable("FOREIGN_ID", new IntegerDataType(), 5);
 		childColumn.setPrimary(true);
@@ -457,13 +457,14 @@ public class OracleScriptWriterTest {
 		database.addTable(parentTable);
 		table = parentTable;
 		Column parentColumn = addColumnToTable("ID", new IntegerDataType(), 5);
+		parentColumn.setPrimary(true);
 		data = new Row(table);
 		data.add(parentColumn, 1);
 		table.addRow(data);
 
 		table = childTable;
 		addForeignKeyToTable(parentTable, parentColumn, childColumn);
-		Assert.assertEquals("INSERT INTO TEST_TABLE(FOREIGN_ID) VALUES (1);\n" + "INSERT INTO PARENT_TABLE(ID) VALUES (1);\n",
+		Assert.assertEquals("INSERT INTO PARENT_TABLE(ID) VALUES (1);\nINSERT INTO TEST_TABLE(FOREIGN_ID) VALUES (1);\n",
 				writer.writeDatabaseInsertions());
 	}
 
@@ -472,12 +473,13 @@ public class OracleScriptWriterTest {
 		createDatabase();
 		Assert.assertEquals("--CREATE USER TEST_SCHEMA IDENTIFIED BY password2Change;\n"
 				+ "-- GRANT CONNECT, RESOURCE, CREATE SESSION, CREATE TABLE, CREATE VIEW,\n"
-				+ "-- \tCREATE PROCEDURE,CREATE SYNONYM, CREATE SEQUENCE, CREATE TRIGGER TO TEST_SCHEMA;\n" + "CREATE TABLE CHILD_TABLE (\n"
-				+ "\tFOREIGN_ID NUMBER(5) NOT NULL\n" + ");\n" + "CREATE TABLE TEST_TABLE (\n" + "\tID NUMBER(5)\n" + ");\n" + "\n"
-				+ "CREATE UNIQUE INDEX TEST_TABLE_UK1 ON TEST_TABLE (ID);\n" + "\n"
-				+ "ALTER TABLE TEST_TABLE ADD CONSTRAINT TEST_TABLE_PK PRIMARY KEY (ID) ENABLE;\n" + "INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES (1);\n"
-				+ "INSERT INTO TEST_TABLE(ID) VALUES (1);\n" + "\n" + "ALTER TABLE CHILD_TABLE ADD CONSTRAINT CHILD_TABLE_FK1 FOREIGN KEY (FOREIGN_ID)\n"
-				+ "\tREFERENCES TEST_TABLE (ID) ENABLE;\n", writer.writeScript());
+				+ "-- \tCREATE PROCEDURE,CREATE SYNONYM, CREATE SEQUENCE, CREATE TRIGGER TO TEST_SCHEMA;\n" + "CREATE TABLE TEST_TABLE (\n"
+				+ "\tID NUMBER(5)\n" + ");\n" + "\n" + "CREATE UNIQUE INDEX TEST_TABLE_UK1 ON TEST_TABLE (ID);\n" + "\n"
+				+ "ALTER TABLE TEST_TABLE ADD CONSTRAINT TEST_TABLE_PK PRIMARY KEY (ID) ENABLE;\n" + "CREATE TABLE CHILD_TABLE (\n"
+				+ "\tFOREIGN_ID NUMBER(5) NOT NULL\n" + ");\n" + "INSERT INTO TEST_TABLE(ID) VALUES (1);\n"
+				+ "INSERT INTO CHILD_TABLE(FOREIGN_ID) VALUES (1);\n" + "\n"
+				+ "ALTER TABLE CHILD_TABLE ADD CONSTRAINT CHILD_TABLE_FK1 FOREIGN KEY (FOREIGN_ID)\n" + "\tREFERENCES TEST_TABLE (ID) ENABLE;\n",
+				writer.writeScript());
 	}
 
 	@Test
