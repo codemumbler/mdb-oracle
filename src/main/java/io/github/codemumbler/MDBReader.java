@@ -19,178 +19,175 @@ import java.util.regex.Pattern;
 
 /**
  * Reads in an Access Database file (.mdb or .accdb) and generates an @see io.github.codemumbler.Database.
- *
  */
 public class MDBReader {
 
-	private Database database;
-	private DataTypeFactory factory = new DataTypeFactory();
-	private com.healthmarketscience.jackcess.Database jackcessDatabase;
+  private Database database;
+  private DataTypeFactory factory = new DataTypeFactory();
+  private com.healthmarketscience.jackcess.Database jackcessDatabase;
 
-	public MDBReader(File mdbFile) throws IOException {
-		if ( mdbFile == null )
-			throw new IllegalArgumentException();
-		this.jackcessDatabase = DatabaseBuilder.open(mdbFile);
-		database = new Database();
-		String schemaName = mdbFile.getName();
-		schemaName = schemaName.replace(".mdb", "").replace(".accdb", "");
-		database.setSchemaName(schemaName);
-	}
+  public MDBReader(File mdbFile) throws IOException {
+    if (mdbFile == null)
+      throw new IllegalArgumentException();
+    this.jackcessDatabase = DatabaseBuilder.open(mdbFile);
+    database = new Database();
+    String schemaName = mdbFile.getName();
+    schemaName = schemaName.replace(".mdb", "").replace(".accdb", "");
+    database.setSchemaName(schemaName);
+  }
 
-	public Database loadDatabase() {
-		try {
-			readTables();
-			buildForeignKeys();
-		} catch (SQLException | IOException ignored) {
-		}
-		return database;
-	}
+  public Database loadDatabase() {
+    try {
+      readTables();
+      buildForeignKeys();
+    } catch (SQLException | IOException ignored) {
+    }
+    return database;
+  }
 
-	private void buildForeignKeys() throws IOException {
-		for (String tableName : jackcessDatabase.getTableNames()) {
-			List<com.healthmarketscience.jackcess.Column> originalColumns = getColumns(tableName);
-			for (com.healthmarketscience.jackcess.Column column : originalColumns ) {
-				String lookupColumn = (String) readColumnProperty(column, "RowSourceType", "");
-				if ( lookupColumn.equals("Table/Query") ) {
-					ForeignKey foreignKey = new ForeignKey();
-					String columns = parseSQL(column, "SELECT (.*) FROM.*");
-					String parentTableName = parseSQL(column, ".*FROM (.*?);");
-					columns = columns.replaceAll("\\[" + parentTableName + "\\]", "");
-					columns = columns.replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\\.", "");
-					int boundColumn = (Short) readColumnProperty(column, "BoundColumn", 1);
-					Table parentTable = database.getTable(parentTableName	);
-					if ( parentTable == null )
-						continue;
-					foreignKey.setParentTable(parentTable);
-					Column parentColumn = parentTable.getColumn(columns.split(",")[boundColumn - 1]);
-					if ( parentColumn == null )
-						continue;
-					foreignKey.setParentColumn(parentColumn);
-					foreignKey.setChildColumn(database.getTable(tableName).getColumn(column.getName()));
-					foreignKey.getChildColumn().setForeignKey(true);
-					database.getTable(tableName).addForeignKey(foreignKey);
-				}
-			}
-		}
-		for (Relationship relationship : jackcessDatabase.getRelationships()) {
-			ForeignKey foreignKey = new ForeignKey();
-			foreignKey.setParentTable(database.getTable(relationship.getFromTable().getName()));
-			foreignKey.setParentColumn(foreignKey.getParentTable().getColumn(relationship.getFromColumns().get(0).getName()));
-			foreignKey.setChildColumn(database.getTable(relationship.getToTable().getName()).getColumn(relationship.getToColumns().get(0).getName()));
-			if ( foreignKey.getParentColumn().isPrimary() ) {
-				foreignKey.getChildColumn().setForeignKey(true);
-				database.getTable(relationship.getToTable().getName()).addForeignKey(foreignKey);
-			}
-		}
-	}
+  private void buildForeignKeys() throws IOException {
+    for (String tableName : jackcessDatabase.getTableNames()) {
+      List<com.healthmarketscience.jackcess.Column> originalColumns = getColumns(tableName);
+      for (com.healthmarketscience.jackcess.Column column : originalColumns) {
+        String lookupColumn = (String) readColumnProperty(column, "RowSourceType", "");
+        if (lookupColumn.equals("Table/Query")) {
+          ForeignKey foreignKey = new ForeignKey();
+          String columns = parseSQL(column, "SELECT (.*) FROM.*");
+          String parentTableName = parseSQL(column, ".*FROM (.*?);");
+          columns = columns.replaceAll("\\[" + parentTableName + "\\]", "");
+          columns = columns.replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\\.", "");
+          int boundColumn = (Short) readColumnProperty(column, "BoundColumn", 1);
+          Table parentTable = database.getTable(parentTableName);
+          if (parentTable == null)
+            continue;
+          foreignKey.setParentTable(parentTable);
+          Column parentColumn = parentTable.getColumn(columns.split(",")[boundColumn - 1]);
+          if (parentColumn == null)
+            continue;
+          foreignKey.setParentColumn(parentColumn);
+          foreignKey.setChildColumn(database.getTable(tableName).getColumn(column.getName()));
+          foreignKey.getChildColumn().setForeignKey(true);
+          database.getTable(tableName).addForeignKey(foreignKey);
+        }
+      }
+    }
+    for (Relationship relationship : jackcessDatabase.getRelationships()) {
+      ForeignKey foreignKey = new ForeignKey();
+      foreignKey.setParentTable(database.getTable(relationship.getFromTable().getName()));
+      foreignKey.setParentColumn(foreignKey.getParentTable().getColumn(relationship.getFromColumns().get(0).getName()));
+      foreignKey.setChildColumn(database.getTable(relationship.getToTable().getName()).getColumn(relationship.getToColumns().get(0).getName()));
+      if (foreignKey.getParentColumn().isPrimary()) {
+        foreignKey.getChildColumn().setForeignKey(true);
+        database.getTable(relationship.getToTable().getName()).addForeignKey(foreignKey);
+      }
+    }
+  }
 
-	@SuppressWarnings("unchecked")
-	private List<com.healthmarketscience.jackcess.Column> getColumns(String tableName) throws IOException {
-		return (List<com.healthmarketscience.jackcess.Column>) jackcessDatabase.getTable(tableName).getColumns();
-	}
+  @SuppressWarnings("unchecked")
+  private List<com.healthmarketscience.jackcess.Column> getColumns(String tableName) throws IOException {
+    return (List<com.healthmarketscience.jackcess.Column>) jackcessDatabase.getTable(tableName).getColumns();
+  }
 
-	private String parseSQL(com.healthmarketscience.jackcess.Column column, String regex) throws IOException {
-		String sql = (String) readColumnProperty(column, "RowSource", "");
-		Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-		Matcher matcher = pattern.matcher(sql);
-		if ( matcher.find() )
-			return matcher.group(1);
-		return "";
-	}
+  private String parseSQL(com.healthmarketscience.jackcess.Column column, String regex) throws IOException {
+    String sql = (String) readColumnProperty(column, "RowSource", "");
+    Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+    Matcher matcher = pattern.matcher(sql);
+    if (matcher.find())
+      return matcher.group(1);
+    return "";
+  }
 
-	private void readTables() throws IOException, SQLException {
-		for (String tableName : jackcessDatabase.getTableNames()) {
-			Table table = new Table();
-			table.setName(tableName);
-			table.addAllColumns(readTableColumns(tableName));
-			readTableData(table);
-			if ( table.hasPrimaryKey() && table.getPrimaryColumn().getDataType() instanceof NumberDataType )
-				table.setNextValue(findMaxPrimaryKeyValue(table) + 1);
-			database.addTable(table);
-		}
-	}
+  private void readTables() throws IOException, SQLException {
+    for (String tableName : jackcessDatabase.getTableNames()) {
+      Table table = new Table();
+      table.setName(tableName);
+      table.addAllColumns(readTableColumns(tableName));
+      readTableData(table);
+      if (table.hasPrimaryKey() && table.getPrimaryColumn().getDataType() instanceof NumberDataType)
+        table.setNextValue(findMaxPrimaryKeyValue(table) + 1);
+      database.addTable(table);
+    }
+  }
 
-	private long findMaxPrimaryKeyValue(Table table) {
-		long maxValue = 0;
-		Column primaryColumn = null;
-		for ( Column column : table.getColumns() )
-			if ( column.isPrimary() )
-				primaryColumn = column;
-		for ( Row row : table.getRows() ) {
-			if ( row.get(primaryColumn) != null ){
-				Number value = (Number) row.get(primaryColumn);
-				maxValue = Math.max(maxValue, value.intValue());
-			}
-		}
-		return maxValue;
-	}
+  private long findMaxPrimaryKeyValue(Table table) {
+    long maxValue = 0;
+    Column primaryColumn = null;
+    for (Column column : table.getColumns())
+      if (column.isPrimary())
+        primaryColumn = column;
+    for (Row row : table.getRows()) {
+      if (row.get(primaryColumn) != null) {
+        Number value = (Number) row.get(primaryColumn);
+        maxValue = Math.max(maxValue, value.intValue());
+      }
+    }
+    return maxValue;
+  }
 
-	private void readTableData(Table table) throws IOException {
-		com.healthmarketscience.jackcess.Table sourceTable = jackcessDatabase.getTable(table.getName());
-		for ( com.healthmarketscience.jackcess.Row sourceRow : sourceTable ) {
-			Row row = new Row(table);
-			for ( Column column : table.getColumns() ) {
-				row.add(column, sourceRow.get(column.getName()));
-			}
-			table.addRow(row);
-		}
-	}
+  private void readTableData(Table table) throws IOException {
+    com.healthmarketscience.jackcess.Table sourceTable = jackcessDatabase.getTable(table.getName());
+    for (com.healthmarketscience.jackcess.Row sourceRow : sourceTable) {
+      Row row = new Row(table);
+      for (Column column : table.getColumns()) {
+        row.add(column, sourceRow.get(column.getName()));
+      }
+      table.addRow(row);
+    }
+  }
 
-	private List<Column> readTableColumns(String tableName) throws IOException, SQLException {
-		List<com.healthmarketscience.jackcess.Column> originalColumns = getColumns(tableName);
-		List<Column> columns = new ArrayList<>(originalColumns.size());
-		for ( com.healthmarketscience.jackcess.Column originalColumn : originalColumns ) {
-			Column column = new Column();
-			column.setName(originalColumn.getName());
-			column.setDataType(readDataType(originalColumn));
-			column.setLength(column.getDataType().getLength(originalColumn));
-			column.setPrimary(isPrimaryColumn(tableName, originalColumn));
-			column.setAutoIncrement(originalColumn.isAutoNumber());
-			column.setRequired(column.isPrimary() || (Boolean) readColumnProperty(originalColumn, "Required", false));
-			if ( column.getDataType().hasPrecision() )
-				column.setPrecision(precision(originalColumn, (PrecisionDataType) column.getDataType()));
-			columns.add(column);
-		}
-		return columns;
-	}
+  private List<Column> readTableColumns(String tableName) throws IOException, SQLException {
+    List<com.healthmarketscience.jackcess.Column> originalColumns = getColumns(tableName);
+    List<Column> columns = new ArrayList<>(originalColumns.size());
+    for (com.healthmarketscience.jackcess.Column originalColumn : originalColumns) {
+      Column column = new Column();
+      column.setName(originalColumn.getName());
+      column.setDataType(readDataType(originalColumn));
+      column.setLength(column.getDataType().getLength(originalColumn));
+      column.setPrimary(isPrimaryColumn(tableName, originalColumn));
+      column.setAutoIncrement(originalColumn.isAutoNumber());
+      column.setRequired(column.isPrimary() || (Boolean) readColumnProperty(originalColumn, "Required", false));
+      if (column.getDataType().hasPrecision())
+        column.setPrecision(precision(originalColumn, (PrecisionDataType) column.getDataType()));
+      columns.add(column);
+    }
+    return columns;
+  }
 
-	private int precision(com.healthmarketscience.jackcess.Column originalColumn, PrecisionDataType dataType) throws IOException {
-		Number number = (Number) readColumnProperty(originalColumn, "DecimalPlaces", dataType.getDefaultPrecision());
-		int precision = number.intValue();
-		if (precision <= 0)
-			precision = dataType.getDefaultPrecision();
-		return precision;
-	}
+  private int precision(com.healthmarketscience.jackcess.Column originalColumn, PrecisionDataType dataType) throws IOException {
+    Number number = (Number) readColumnProperty(originalColumn, "DecimalPlaces", dataType.getDefaultPrecision());
+    int precision = number.intValue();
+    if (precision <= 0)
+      precision = dataType.getDefaultPrecision();
+    return precision;
+  }
 
-	private Object readColumnProperty(com.healthmarketscience.jackcess.Column column, String propertyName,
-									  Object defaultValue) throws IOException {
-		PropertyMap.Property property = column.getProperties().get(propertyName);
-		if ( property != null )
-			return property.getValue();
-		return defaultValue;
-	}
+  private Object readColumnProperty(com.healthmarketscience.jackcess.Column column, String propertyName, Object defaultValue) throws IOException {
+    PropertyMap.Property property = column.getProperties().get(propertyName);
+    if (property != null)
+      return property.getValue();
+    return defaultValue;
+  }
 
-	private boolean isPrimaryColumn(String tableName, com.healthmarketscience.jackcess.Column originalColumn)
-			throws IOException {
-		for ( Index index : jackcessDatabase.getTable(tableName).getIndexes() ) {
-			if (index.isPrimaryKey()) {
-				for (Index.Column indexColumn : index.getColumns()) {
-					if (indexColumn.getName().equals(originalColumn.getName())) {
-						return true;
-					}
-				}
-			}
-		}
-		boolean hasPrimaryKey = false;
-		for ( Index index : jackcessDatabase.getTable(tableName).getIndexes() ) {
-			if (index.isPrimaryKey()) {
-				hasPrimaryKey = true;
-			}
-		}
-		return originalColumn.isAutoNumber() && !hasPrimaryKey;
-	}
+  private boolean isPrimaryColumn(String tableName, com.healthmarketscience.jackcess.Column originalColumn) throws IOException {
+    for (Index index : jackcessDatabase.getTable(tableName).getIndexes()) {
+      if (index.isPrimaryKey()) {
+        for (Index.Column indexColumn : index.getColumns()) {
+          if (indexColumn.getName().equals(originalColumn.getName())) {
+            return true;
+          }
+        }
+      }
+    }
+    boolean hasPrimaryKey = false;
+    for (Index index : jackcessDatabase.getTable(tableName).getIndexes()) {
+      if (index.isPrimaryKey()) {
+        hasPrimaryKey = true;
+      }
+    }
+    return originalColumn.isAutoNumber() && !hasPrimaryKey;
+  }
 
-	private DataType readDataType(com.healthmarketscience.jackcess.Column originalColumn) throws SQLException {
-		return factory.createDataType(originalColumn.getSQLType());
-	}
+  private DataType readDataType(com.healthmarketscience.jackcess.Column originalColumn) throws SQLException {
+    return factory.createDataType(originalColumn.getSQLType());
+  }
 }

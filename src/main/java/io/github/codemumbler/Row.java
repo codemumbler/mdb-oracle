@@ -6,30 +6,30 @@ import java.util.Map;
 
 public class Row {
 
-	private Table table;
-	private Map<Column, Object> valueMap = new HashMap<>();
+  private Table table;
+  private Map<Column, Object> valueMap = new HashMap<>();
 
-	public Row(Table table) {
-		this.table = table;
-	}
+  public Row(Table table) {
+    this.table = table;
+  }
 
-	public List<Column> getColumns() {
-		return table.getColumns();
-	}
+  public List<Column> getColumns() {
+    return table.getColumns();
+  }
 
-	public Object get(Column column) {
-		return valueMap.get(column);
-	}
+  public Object get(Column column) {
+    return valueMap.get(column);
+  }
 
-	public void add(Column column, Object value) {
-		valueMap.put(column, value);
-	}
+  public void add(Column column, Object value) {
+    valueMap.put(column, value);
+  }
 
-	public String getTableName() {
-		return table.getName();
-	}
+  public String getTableName() {
+    return table.getName();
+  }
 
-	public Object getPrimaryKeyValue() {
-		return get(table.getPrimaryColumn());
-	}
+  public Object getPrimaryKeyValue() {
+    return get(table.getPrimaryColumn());
+  }
 }

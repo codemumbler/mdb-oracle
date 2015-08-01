@@ -7,100 +7,100 @@ import java.util.Map;
 
 public class Table {
 
-	private String name;
-	private List<Column> columns = new ArrayList<>();
-	private List<Row> rows = new ArrayList<>();
-	private List<ForeignKey> foreignKeys = new ArrayList<>();
-	private long nextValue;
-	private Map<Column, String> indexedValues = new HashMap<>();
+  private String name;
+  private List<Column> columns = new ArrayList<>();
+  private List<Row> rows = new ArrayList<>();
+  private List<ForeignKey> foreignKeys = new ArrayList<>();
+  private long nextValue;
+  private Map<Column, String> indexedValues = new HashMap<>();
 
-	public String getName() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public List<Column> getColumns() {
-		return columns;
-	}
+  public List<Column> getColumns() {
+    return columns;
+  }
 
-	public void addColumn(Column column) {
-		this.columns.add(column);
-	}
+  public void addColumn(Column column) {
+    this.columns.add(column);
+  }
 
-	public List<Row> getRows() {
-		return rows;
-	}
+  public List<Row> getRows() {
+    return rows;
+  }
 
-	public List<ForeignKey> getForeignKeys() {
-		return foreignKeys;
-	}
+  public List<ForeignKey> getForeignKeys() {
+    return foreignKeys;
+  }
 
-	public void addForeignKey(ForeignKey foreignKey) {
-		if ( !foreignKeys.contains(foreignKey) )
-			foreignKeys.add(foreignKey);
-	}
+  public void addForeignKey(ForeignKey foreignKey) {
+    if (!foreignKeys.contains(foreignKey))
+      foreignKeys.add(foreignKey);
+  }
 
-	public Column getColumn(String columnName) {
-		for ( Column column : columns ) {
-			if ( column.getName().equals(columnName) )
-				return column;
-		}
-		return null;
-	}
+  public Column getColumn(String columnName) {
+    for (Column column : columns) {
+      if (column.getName().equals(columnName))
+        return column;
+    }
+    return null;
+  }
 
-	public void addAllColumns(List<Column> columns) {
-		this.columns.addAll(columns);
-	}
+  public void addAllColumns(List<Column> columns) {
+    this.columns.addAll(columns);
+  }
 
-	public long getNextValue() {
-		return nextValue;
-	}
+  public long getNextValue() {
+    return nextValue;
+  }
 
-	public void setNextValue(long nextValue) {
-		this.nextValue = nextValue;
-	}
+  public void setNextValue(long nextValue) {
+    this.nextValue = nextValue;
+  }
 
-	public void addRow(Row row) {
-		rows.add(row);
-	}
+  public void addRow(Row row) {
+    rows.add(row);
+  }
 
-	public Column getPrimaryColumn() {
-		for ( Column column : getColumns() )
-			if ( column.isPrimary() )
-				return column;
-		return null;
-	}
+  public Column getPrimaryColumn() {
+    for (Column column : getColumns())
+      if (column.isPrimary())
+        return column;
+    return null;
+  }
 
-	public boolean hasPrimaryKey() {
-		return getPrimaryColumn() != null;
-	}
+  public boolean hasPrimaryKey() {
+    return getPrimaryColumn() != null;
+  }
 
-	public boolean parentTablesHaveForeignKeyValue(Row row) {
-		for ( Column column : row.getColumns() ) {
-			if ( column.isForeignKey() ) {
-				for ( ForeignKey foreignKey : foreignKeys ) {
-					if ( foreignKey.getChildColumn().equals(column) && !foreignKey.getParentTable().keyExists(foreignKey.getParentColumn(), row.get(column)) ) {
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
+  public boolean parentTablesHaveForeignKeyValue(Row row) {
+    for (Column column : row.getColumns()) {
+      if (column.isForeignKey()) {
+        for (ForeignKey foreignKey : foreignKeys) {
+          if (foreignKey.getChildColumn().equals(column) && !foreignKey.getParentTable().keyExists(foreignKey.getParentColumn(), row.get(column))) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
 
-	private boolean keyExists(Column parentColumn, Object value) {
-		if ( indexedValues.get(parentColumn) == null ) {
-			StringBuilder values = new StringBuilder(" 0,");
-			for (Row row : getRows()) {
-				values.append(" ").append(row.get(parentColumn)).append(",");
-			}
-			indexedValues.put(parentColumn, values.toString());
-		}
-		return indexedValues.get(parentColumn).contains(" " + value + ",");
-	}
+  private boolean keyExists(Column parentColumn, Object value) {
+    if (indexedValues.get(parentColumn) == null) {
+      StringBuilder values = new StringBuilder(" 0,");
+      for (Row row : getRows()) {
+        values.append(" ").append(row.get(parentColumn)).append(",");
+      }
+      indexedValues.put(parentColumn, values.toString());
+    }
+    return indexedValues.get(parentColumn).contains(" " + value + ",");
+  }
 
   @Override
   public String toString() {

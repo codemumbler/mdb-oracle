@@ -4,19 +4,19 @@ import java.math.BigDecimal;
 
 public class CurrencyDataType extends PrecisionDataType {
 
-	@Override
-	public boolean hasPrecision() {
-		return true;
-	}
+  @Override
+  public boolean hasPrecision() {
+    return true;
+  }
 
-	@Override
-	public int getDefaultPrecision() {
-		return 2;
-	}
+  @Override
+  public int getDefaultPrecision() {
+    return 2;
+  }
 
-	@Override
-	public String writeDataValue(Object value) {
-		BigDecimal money = (BigDecimal) value;
-		return money.toPlainString();
-	}
+  @Override
+  public String writeDataValue(Object value) {
+    BigDecimal money = (BigDecimal) value;
+    return money.toPlainString();
+  }
 }
